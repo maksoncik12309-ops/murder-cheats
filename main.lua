@@ -1,22 +1,25 @@
 -- ============================================================
---  MURDER CHEATS v23 | Fixed Sliders + Comfortable Theme
+--  MURDER CHEATS v24 | Fixed Tabs & Perfect Sliders
 -- ============================================================
 local UIS, RS, Plr, Lgt = game:GetService("UserInputService"), game:GetService("RunService"), game:GetService("Players"), game:GetService("Lighting")
 local VU, Http, Tp, Gui = game:GetService("VirtualUser"), game:GetService("HttpService"), game:GetService("TeleportService"), game:GetService("GuiService")
 local Twn = game:GetService("TweenService")
 local player, cam, pg = Plr.LocalPlayer, workspace.CurrentCamera, Plr.LocalPlayer:WaitForChild("PlayerGui")
 
--- ПРИЯТНАЯ ТЕМА (Dark Slate)
+-- ТЕМА (Dark Slate)
 local C_BG = Color3.fromRGB(25, 25, 30)
 local C_PNL = Color3.fromRGB(32, 32, 40)
 local C_ITM = Color3.fromRGB(45, 45, 55)
-local C_ACC = Color3.fromRGB(88, 101, 242)   -- Мягкий синий/фиолетовый
+local C_ACC = Color3.fromRGB(88, 101, 242)
 local C_TXT = Color3.fromRGB(240, 240, 240)
 local C_SUB = Color3.fromRGB(160, 160, 170)
 local C_DNG = Color3.fromRGB(237, 66, 69)
 
--- 🔐 ПАРОЛЬ
+-- ОЧИСТКА СТАРЫХ ГУИ (Защита от наложений)
 if pg:FindFirstChild("MC_Pwd") then pg.MC_Pwd:Destroy() end
+if pg:FindFirstChild("MurderCheats") then pg.MurderCheats:Destroy() end
+
+-- 🔐 ПАРОЛЬ
 local pG = Instance.new("ScreenGui", pg); pG.Name="MC_Pwd"; pG.IgnoreGuiInset=true; pG.DisplayOrder=999
 local pB = Instance.new("Frame", pG); pB.Size=UDim2.fromScale(1,1); pB.BackgroundColor3=Color3.new(0,0,0); pB.BackgroundTransparency=0.4
 local pC = Instance.new("Frame", pB); pC.Size=UDim2.new(0,360,0,260); pC.Position=UDim2.new(0.5,-180,0.5,-130); pC.BackgroundColor3=C_BG
@@ -32,7 +35,7 @@ pBtn.MouseButton1Click:Connect(unlock); pI.FocusLost:Connect(unlock)
 repeat task.wait(0.1) until pOk
 
 -- КОНФИГИ
-local CF = "MC_v23.json"; local cfg = { c={default={t={},s={}}}, a="default", b="RightShift" }; local c = { t=cfg.c.default.t, s=cfg.c.default.s }
+local CF = "MC_v24.json"; local cfg = { c={default={t={},s={}}}, a="default", b="RightShift" }; local c = { t=cfg.c.default.t, s=cfg.c.default.s }
 local function save() cfg.c[cfg.a]={t=c.t,s=c.s}; if writefile then pcall(function() writefile(CF, Http:JSONEncode(cfg)) end) end end
 if isfile and readfile and isfile(CF) then local ok, d = pcall(function() return Http:JSONDecode(readfile(CF)) end); if ok and d.c then cfg=d; if cfg.c[cfg.a] then c.t=cfg.c[cfg.a].t; c.s=cfg.c[cfg.a].s end end end
 local bind = Enum.KeyCode[cfg.b] or Enum.KeyCode.RightShift
@@ -47,26 +50,34 @@ local sb = Instance.new("Frame", frm); sb.Size=UDim2.new(0,140,1,-20); sb.Positi
 Instance.new("UICorner", sb).CornerRadius=UDim.new(0,10)
 local brd = Instance.new("TextLabel", sb); brd.Size=UDim2.new(1,-16,0,40); brd.Position=UDim2.new(0,10,0,10); brd.BackgroundTransparency=1; brd.Font=Enum.Font.GothamBold; brd.TextSize=16; brd.TextColor3=C_TXT; brd.Text="MURDER\nCHEATS"; brd.TextXAlignment=Enum.TextXAlignment.Left
 local tl = Instance.new("Frame", sb); tl.Size=UDim2.new(1,-16,1,-70); tl.Position=UDim2.new(0,8,0,60); tl.BackgroundTransparency=1; Instance.new("UIListLayout", tl).Padding=UDim.new(0,4)
-local ca = Instance.new("Frame", frm); ca.Size=UDim2.new(1,-170,1,-20); ca.Position=UDim2.new(0,160,0,10); ca.BackgroundTransparency=1
+local ca = Instance.new("Frame", frm); ca.Size=UDim2.new(1,-170,1,-20); ca.Position=UDim2.new(0,160,0,10); ca.BackgroundTransparency=1; ca.ClipsDescendants = true
 local cls = Instance.new("TextButton", frm); cls.Size=UDim2.new(0,26,0,26); cls.Position=UDim2.new(1,-36,0,12); cls.BackgroundColor3=C_ITM; cls.Text="✕"; cls.TextColor3=C_TXT; cls.Font=Enum.Font.GothamBold; Instance.new("UICorner", cls).CornerRadius=UDim.new(0,6)
 
+-- ИСПРАВЛЕННЫЕ ВКЛАДКИ
 local tabs = {}
 local function mkTab(n)
     local b = Instance.new("TextButton", tl); b.Size=UDim2.new(1,0,0,30); b.BackgroundColor3=C_ITM; b.BackgroundTransparency=0.5; b.Text="  "..n; b.Font=Enum.Font.GothamBold; b.TextSize=12; b.TextColor3=C_SUB; b.TextXAlignment=Enum.TextXAlignment.Left
     Instance.new("UICorner", b).CornerRadius=UDim.new(0,6)
-    local s = Instance.new("ScrollingFrame", ca); s.Size=UDim2.fromScale(1,1); s.BackgroundTransparency=1; s.ScrollBarThickness=3; s.ScrollBarImageColor3=C_ACC; s.AutomaticCanvasSize=Enum.AutomaticSize.Y; s.Visible=false
+    local s = Instance.new("ScrollingFrame", ca); s.Size=UDim2.fromScale(1,1); s.BackgroundTransparency=1; s.ScrollBarThickness=3; s.ScrollBarImageColor3=C_ACC; s.AutomaticCanvasSize=Enum.AutomaticSize.Y; s.Visible=false; s.Active = false
     Instance.new("UIListLayout", s).Padding=UDim.new(0,6); tabs[n]={b=b, s=s}
 end
 for _, n in ipairs({"Combat", "Visuals", "Movement", "Utility", "Config", "Settings"}) do mkTab(n); tabs[n].b.MouseButton1Click:Connect(function()
-    for n2, t in pairs(tabs) do t.s.Visible = (n2 == n); t.b.BackgroundTransparency = (n2 == n) and 0 or 0.5; t.b.TextColor3 = (n2 == n) and C_TXT or C_SUB end
+    for n2, t in pairs(tabs) do 
+        local isA = (n2 == n)
+        t.s.Visible = isA
+        t.s.Active = isA -- Отключает клики на скрытых вкладках
+        t.b.BackgroundTransparency = isA and 0 or 0.5
+        t.b.TextColor3 = isA and C_TXT or C_SUB 
+    end
 end) end
 
--- ГЛОБАЛЬНЫЙ ОБРАБОТЧИК ПЕРЕТАСКИВАНИЯ (Для починки ползунков)
+-- 🛠 ИДЕАЛЬНЫЕ ПОЛЗУНКИ
 local draggingSlider = nil
 UIS.InputChanged:Connect(function(input)
     if draggingSlider and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        if not frm.Visible then draggingSlider = nil; return end
         local rel = (input.Position.X - draggingSlider.track.AbsolutePosition.X) / draggingSlider.track.AbsoluteSize.X
-        draggingSlider.apply(math.clamp(rel, 0, 1))
+        draggingSlider.applyPct(math.clamp(rel, 0, 1))
     end
 end)
 UIS.InputEnded:Connect(function(input)
@@ -84,15 +95,13 @@ local function toggle(p, n, en, dis)
 end
 local function btn(p, n, cl, clr) local b=Instance.new("TextButton", p); b.Size=UDim2.new(1,0,0,34); b.BackgroundColor3=C_ITM; b.Text="  ▸ "..n; b.Font=Enum.Font.GothamBold; b.TextSize=12; b.TextColor3=clr or C_TXT; b.TextXAlignment=Enum.TextXAlignment.Left; Instance.new("UICorner", b).CornerRadius=UDim.new(0,6); b.MouseButton1Click:Connect(function() pcall(cl) end); return b end
 
--- 🛠 ИСПРАВЛЕННЫЙ ПОЛЗУНОК
 local function slider(p, n, mn, mx, df, ch)
     local v = df
     local h=Instance.new("Frame", p); h.Size=UDim2.new(1,0,0,65); h.BackgroundColor3=C_ITM; Instance.new("UICorner", h).CornerRadius=UDim.new(0,6)
     local l=Instance.new("TextLabel", h); l.Size=UDim2.new(1,-80,0,20); l.Position=UDim2.new(0,12,0,6); l.BackgroundTransparency=1; l.Font=Enum.Font.Gotham; l.TextSize=13; l.TextColor3=C_TXT; l.Text=n; l.TextXAlignment=Enum.TextXAlignment.Left
     local bx=Instance.new("TextBox", h); bx.Size=UDim2.new(0,60,0,22); bx.Position=UDim2.new(1,-72,0,6); bx.BackgroundColor3=C_BG; bx.Font=Enum.Font.Code; bx.TextSize=13; bx.TextColor3=C_TXT; bx.Text=tostring(df); Instance.new("UICorner", bx).CornerRadius=UDim.new(0,4)
     
-    -- Увеличенная область клика для трека
-    local trkHit = Instance.new("Frame", h); trkHit.Size=UDim2.new(1,-24,0,20); trkHit.Position=UDim2.new(0,12,0,36); trkHit.BackgroundTransparency=1
+    local trkHit = Instance.new("TextButton", h); trkHit.Size=UDim2.new(1,-24,0,24); trkHit.Position=UDim2.new(0,12,0,36); trkHit.BackgroundTransparency=1; trkHit.Text=""
     local trk=Instance.new("Frame", trkHit); trk.Size=UDim2.new(1,0,0,6); trk.Position=UDim2.new(0,0,0.5,-3); trk.BackgroundColor3=Color3.fromRGB(20,20,25); Instance.new("UICorner", trk).CornerRadius=UDim.new(1,0)
     local f=Instance.new("Frame", trk); f.Size=UDim2.new(0,0,1,0); f.BackgroundColor3=C_ACC; Instance.new("UICorner", f).CornerRadius=UDim.new(1,0)
     local k=Instance.new("Frame", trk); k.Size=UDim2.new(0,14,0,14); k.Position=UDim2.new(0,-7,0.5,-7); k.BackgroundColor3=C_TXT; Instance.new("UICorner", k).CornerRadius=UDim.new(1,0)
@@ -105,11 +114,10 @@ local function slider(p, n, mn, mx, df, ch)
     
     trkHit.InputBegan:Connect(function(i) 
         if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then 
-            draggingSlider = { track = trk, apply = function(pct) setV(mn+(mx-mn)*pct, true, true) end }
+            draggingSlider = { track = trk, applyPct = function(pct) setV(mn+(mx-mn)*pct, true, true) end }
             local r=(i.Position.X-trk.AbsolutePosition.X)/trk.AbsoluteSize.X; setV(mn+(mx-mn)*math.clamp(r,0,1),true,true) 
         end 
     end)
-    
     bx.FocusLost:Connect(function() setV(tonumber(bx.Text) or df, true, true) end)
     setV(df,false,false); table.insert(rst, function() setV(df,true,true) end); sl[n]={set=setV, get=function() return v end, def=df}
 end
@@ -117,32 +125,26 @@ end
 local function getHum() local ch=player.Character; return ch and ch:FindFirstChildOfClass("Humanoid") end
 local function getTeam(p) return p.Team and p.Team.TeamColor.Color or C_ACC end
 
--- ЛОГИКА (Спринт)
+-- ЛОГИКА
 local fK = {W=false, A=false, S=false, D=false, Space=false, Ctrl=false}
 local shiftHeld, sprintOn, sprintSpd, baseSpeed = false, false, 60, 16
-
 local flyAct, bv, bg, fSpd = false, nil, nil, 50
 local function setFly(on) if bv then bv:Destroy() end; if bg then bg:Destroy() end; local ch, hu = player.Character, getHum(); if hu then hu.PlatformStand=false end; flyAct=false; if on and ch and hu then local hrp=ch:FindFirstChild("HumanoidRootPart"); if hrp then bv=Instance.new("BodyVelocity",hrp); bv.MaxForce=Vector3.new(9e9,9e9,9e9); bg=Instance.new("BodyGyro",hrp); bg.MaxTorque=Vector3.new(9e9,9e9,9e9); bg.P=10000; hu.PlatformStand=true; flyAct=true end end end
 local infJ, noclp, bhop, spin, sSpd, freecam, fPos, fRot, clickTP, antiAfk = false, false, false, false, 5, false, nil, nil, false, false
 
 RS.Heartbeat:Connect(function()
     local hu = getHum()
-    if hu then
-        if sprintOn then hu.WalkSpeed = shiftHeld and sprintSpd or baseSpeed else hu.WalkSpeed = baseSpeed end
-    end
+    if hu then if sprintOn then hu.WalkSpeed = shiftHeld and sprintSpd or baseSpeed else hu.WalkSpeed = baseSpeed end end
     if spin then local hrp=player.Character and player.Character:FindFirstChild("HumanoidRootPart"); if hrp then hrp.CFrame=hrp.CFrame*CFrame.Angles(0,math.rad(sSpd),0) end end
 end)
-
 RS.RenderStepped:Connect(function()
     if flyAct then local hrp=player.Character and player.Character:FindFirstChild("HumanoidRootPart"); if hrp and bv and bg then cam=workspace.CurrentCamera; local d=Vector3.zero; if fK.W then d=d+cam.CFrame.LookVector end; if fK.S then d=d-cam.CFrame.LookVector end; if fK.A then d=d-cam.CFrame.RightVector end; if fK.D then d=d+cam.CFrame.RightVector end; if fK.Space then d=d+Vector3.new(0,1,0) end; if fK.Ctrl then d=d-Vector3.new(0,1,0) end; bv.Velocity=d.Magnitude>0 and d.Unit*fSpd or Vector3.zero; bg.CFrame=cam.CFrame end end
     if freecam then cam=workspace.CurrentCamera; local d=Vector3.zero; if fK.W then d=d+fRot end; if fK.S then d=d-fRot end; if fK.A then d=d-fRot:Cross(Vector3.new(0,1,0)).Unit end; if fK.D then d=d+fRot:Cross(Vector3.new(0,1,0)).Unit end; fPos=fPos+d*1.5; cam.CFrame=CFrame.new(fPos, fPos+fRot) end
 end)
-
 RS.Stepped:Connect(function()
     if noclp then local ch=player.Character; if ch then for _,p in ipairs(ch:GetDescendants()) do if p:IsA("BasePart") then p.CanCollide=false end end end end
     if bhop then local hu=getHum(); if hu and (hu:GetState()==Enum.HumanoidStateType.Landed or hu:GetState()==Enum.HumanoidStateType.Running) then hu:ChangeState(Enum.HumanoidStateType.Jumping) end end
 end)
-
 UIS.JumpRequest:Connect(function() local hu=getHum(); if infJ and hu then hu:ChangeState(Enum.HumanoidStateType.Jumping) end end)
 UIS.InputBegan:Connect(function(i,g)
     if i.KeyCode==Enum.KeyCode.LeftShift then shiftHeld = true end
@@ -154,7 +156,7 @@ end)
 UIS.InputEnded:Connect(function(i) if i.KeyCode==Enum.KeyCode.LeftShift then shiftHeld = false end end)
 Plr.LocalPlayer.Idled:Connect(function() if antiAfk then VU:CaptureController(); VU:Button2Down(Vector2.new(0,0)); task.wait(1); VU:Button2Up(Vector2.new(0,0)) end end)
 
--- ESP & AIM (сжато)
+-- ESP & AIM (Сжато)
 local espOn, espEn, espNm, espHp, espDs = false, false, false, false, false
 local hl, bb = {}, {}
 local function clrEsp() for _,h in pairs(hl) do h:Destroy() end; for _,b in pairs(bb) do b:Destroy() end; hl, bb = {}, {} end
@@ -207,11 +209,9 @@ slider(mS, "JumpPower", 50, 400, 50, function(v) local h=getHum(); if h then h.J
 toggle(mS, "Infinite Jump", function() infJ=true end, function() infJ=false end)
 toggle(mS, "Noclip", function() noclp=true end, function() noclp=false end)
 toggle(mS, "Bhop", function() bhop=true end, function() bhop=false end)
-
-sect(mS, "Sprint (Hold Shift)")
+sect(mS, "Sprint (Shift)")
 toggle(mS, "Enable Sprint", function() sprintOn=true end, function() sprintOn=false; local h=getHum(); if h then h.WalkSpeed=baseSpeed end end)
 slider(mS, "Sprint Speed", 20, 250, 60, function(v) sprintSpd=v end)
-
 sect(mS, "Fly")
 toggle(mS, "Fly (WASD)", function() setFly(true) end, function() setFly(false) end)
 slider(mS, "Fly Speed", 10, 300, 50, function(v) fSpd=v end)
@@ -265,7 +265,10 @@ for n,v in pairs(c.s) do if sl[n] then sl[n].set(v, true, false) end end
 
 local function openMenu() frm.Visible = true; uisc.Scale = 0.9; Twn:Create(uisc, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Scale = 1}):Play() end
 local function closeMenu() local t = Twn:Create(uisc, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Scale = 0.9}); t:Play(); t.Completed:Connect(function() frm.Visible = false end) end
-cls.MouseButton1Click:Connect(closeMenu); tabs["Combat"].s.Visible=true; tabs["Combat"].b.BackgroundTransparency=0; tabs["Combat"].b.TextColor3=C_TXT
+cls.MouseButton1Click:Connect(closeMenu)
+
+-- Включаем первую вкладку
+tabs["Combat"].s.Visible=true; tabs["Combat"].b.BackgroundTransparency=0; tabs["Combat"].b.TextColor3=C_TXT
 
 UIS.InputBegan:Connect(function(i, g)
     if i.KeyCode==bind and not g then if frm.Visible then closeMenu() else openMenu() end return end
