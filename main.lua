@@ -1,7 +1,3 @@
--- ============================================================
---  MURDER CHEATS  v9  |  mouse-based aim + wallcheck
---  LocalScript -> StarterPlayerScripts
--- ============================================================
 local UIS         = game:GetService("UserInputService")
 local RunService  = game:GetService("RunService")
 local Players     = game:GetService("Players")
