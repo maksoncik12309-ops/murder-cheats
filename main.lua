@@ -1,5 +1,5 @@
 -- ============================================================
---  MURDER CHEATS  v8  |  fixed hitbox (collide + adjustable transparency)
+--  MURDER CHEATS  v9  |  mouse-based aim + wallcheck
 --  LocalScript -> StarterPlayerScripts
 -- ============================================================
 local UIS         = game:GetService("UserInputService")
@@ -12,6 +12,7 @@ local HttpService = game:GetService("HttpService")
 local Teleport    = game:GetService("TeleportService")
 local Stats       = game:GetService("Stats")
 local StarterGui  = game:GetService("StarterGui")
+local GuiService  = game:GetService("GuiService")
 
 local player = Players.LocalPlayer
 local cam    = workspace.CurrentCamera
@@ -58,7 +59,7 @@ watermark.BackgroundTransparency = 1
 watermark.Font = Enum.Font.GothamBold
 watermark.TextSize = 12
 watermark.RichText = true
-watermark.Text = '<font color="#00FF96">●</font> MURDER CHEATS  <font color="#FFA03C">v8</font>'
+watermark.Text = '<font color="#00FF96">●</font> MURDER CHEATS  <font color="#FFA03C">v9</font>'
 watermark.TextXAlignment = Enum.TextXAlignment.Left
 watermark.Parent = gui
 
@@ -1013,7 +1014,7 @@ end
 RunService.Heartbeat:Connect(applyHitbox)
 
 -- ============================================================
---  AIMBOT / TRIGGER
+--  AIMBOT / TRIGGER  (mouse-based)
 -- ============================================================
 local aimOn, aimAutoShoot, aimKeyHeld, aimWallcheck, aimSnap = false, false, false, false, false
 local aimHold = Enum.UserInputType.MouseButton2
@@ -1027,9 +1028,17 @@ local priorityList = {"Nearest", "Lowest HP", "Highest HP"}
 
 local triggerOn, triggerFOV = false, 30
 
+-- Смещение GUI-инсета (нужно для правильного mouse->viewport)
+local topInset = 36
+pcall(function() topInset = GuiService:GetGuiInset().Y end)
+local function getMouseViewport()
+    return UIS:GetMouseLocation() - Vector2.new(0, topInset)
+end
+
+-- FOV-круг: следует за мышью
 local fovCircle = Instance.new("Frame")
 fovCircle.Size = UDim2.new(0, aimFOV*2, 0, aimFOV*2)
-fovCircle.Position = UDim2.new(0.5, 0, 0.5, 0)
+fovCircle.Position = UDim2.fromOffset(0, 0)
 fovCircle.AnchorPoint = Vector2.new(0.5, 0.5)
 fovCircle.BackgroundTransparency = 1
 fovCircle.Visible = false
@@ -1042,19 +1051,24 @@ local function refreshFOVCircle() fovCircle.Size = UDim2.new(0, aimFOV*2, 0, aim
 local function hasLOS(part)
     local origin = cam.CFrame.Position
     local params = RaycastParams.new()
-    params.FilterDescendantsInstances = {player.Character}
     params.FilterType = Enum.RaycastFilterType.Exclude
-    local res = workspace:Raycast(origin, part.Position - origin, params)
-    if res and res.Instance then return res.Instance:IsDescendantOf(part.Parent) end
+    params.FilterDescendantsInstances = {player.Character}
+    local dir = part.Position - origin
+    local res = workspace:Raycast(origin, dir, params)
+    if res and res.Instance then
+        return res.Instance:IsDescendantOf(part.Parent)
+    end
     return true
 end
+
 local function predictPos(part)
     if aimPrediction <= 0 then return part.Position end
     return part.Position + part.AssemblyLinearVelocity * aimPrediction
 end
+
 local function getTarget(fovOverride)
     cam = workspace.CurrentCamera
-    local center = Vector2.new(cam.ViewportSize.X/2, cam.ViewportSize.Y/2)
+    local mousePos = getMouseViewport()
     local maxFov = fovOverride or aimFOV
     local best, bestScore
     for _, p in ipairs(Players:GetPlayers()) do
@@ -1066,7 +1080,7 @@ local function getTarget(fovOverride)
                     if not aimWallcheck or hasLOS(part) then
                         local sp, onScreen = cam:WorldToViewportPoint(predictPos(part))
                         if onScreen and sp.Z > 0 then
-                            local d = (Vector2.new(sp.X, sp.Y) - center).Magnitude
+                            local d = (Vector2.new(sp.X, sp.Y) - mousePos).Magnitude
                             if d < maxFov then
                                 local score
                                 if aimPriority == "Nearest" then score = d
@@ -1084,7 +1098,13 @@ local function getTarget(fovOverride)
     end
     return best
 end
+
 RunService.RenderStepped:Connect(function()
+    -- FOV-круг следует за мышью
+    if fovCircle.Visible then
+        local mouse = UIS:GetMouseLocation()
+        fovCircle.Position = UDim2.fromOffset(mouse.X, mouse.Y)
+    end
     if aimOn and aimKeyHeld then
         local target = getTarget()
         if target then
@@ -1101,6 +1121,7 @@ RunService.RenderStepped:Connect(function()
         end
     end
 end)
+
 UIS.InputBegan:Connect(function(input, gp)
     if gp then return end
     if aimSnap and input.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -1111,6 +1132,7 @@ UIS.InputBegan:Connect(function(input, gp)
         end
     end
 end)
+
 task.spawn(function()
     while gui.Parent do
         task.wait(0.05)
@@ -1466,7 +1488,7 @@ end
 -- ============================================================
 local cScroll = tabs["Combat"].scroll
 section(cScroll, "Aimbot")
-createToggle(cScroll, "Aimbot  (hold RMB)",
+createToggle(cScroll, "Aimbot  (hold RMB, от мыши)",
     function() aimOn = true; fovCircle.Visible = true end,
     function() aimOn = false; fovCircle.Visible = false end)
 createToggle(cScroll, "FOV Circle",
@@ -1476,7 +1498,9 @@ createSlider(cScroll, "Aim FOV", 20, 500, 150, function(v) aimFOV = v; refreshFO
 createSlider(cScroll, "Aim Smoothness", 0, 0.95, 0.35, function(v) aimSmooth = v end)
 createSlider(cScroll, "Prediction (сек)", 0, 0.5, 0, function(v) aimPrediction = v end)
 createToggle(cScroll, "Auto Shoot", function() aimAutoShoot = true end, function() aimAutoShoot = false end)
-createToggle(cScroll, "Wallcheck", function() aimWallcheck = true end, function() aimWallcheck = false end)
+createToggle(cScroll, "Wallcheck (не наводится через стены)",
+    function() aimWallcheck = true end,
+    function() aimWallcheck = false end)
 createToggle(cScroll, "Snap Aim (клик -> мгновенно в цель)",
     function() aimSnap = true end, function() aimSnap = false end)
 do
