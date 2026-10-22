@@ -1,4 +1,6 @@
-
+-- ============================================================
+--  MURDER CHEATS v28 | Force Sprint + Draggable WM + New Funcs
+-- ============================================================
 local UIS, RS, Plr, Lgt = game:GetService("UserInputService"), game:GetService("RunService"), game:GetService("Players"), game:GetService("Lighting")
 local VU, Http, Tp, Gui = game:GetService("VirtualUser"), game:GetService("HttpService"), game:GetService("TeleportService"), game:GetService("GuiService")
 local Twn = game:GetService("TweenService")
@@ -10,6 +12,7 @@ local C_ACC, C_TXT, C_SUB, C_DNG = Color3.fromRGB(88, 101, 242), Color3.fromRGB(
 if pg:FindFirstChild("MC_Pwd") then pg.MC_Pwd:Destroy() end
 if pg:FindFirstChild("MurderCheats") then pg.MurderCheats:Destroy() end
 
+-- 🔐 ПАРОЛЬ
 local pG = Instance.new("ScreenGui", pg); pG.Name="MC_Pwd"; pG.IgnoreGuiInset=true; pG.DisplayOrder=999
 local pB = Instance.new("Frame", pG); pB.Size=UDim2.fromScale(1,1); pB.BackgroundColor3=Color3.new(0,0,0); pB.BackgroundTransparency=0.4
 local pC = Instance.new("Frame", pB); pC.Size=UDim2.new(0,360,0,260); pC.Position=UDim2.new(0.5,-180,0.5,-130); pC.BackgroundColor3=C_BG
@@ -25,7 +28,7 @@ pBtn.MouseButton1Click:Connect(unlock); pI.FocusLost:Connect(unlock)
 repeat task.wait(0.1) until pOk
 
 -- КОНФИГИ
-local CF = "MC_v27.json"; local cfg = { c={default={t={},s={}}}, a="default", b="RightShift" }; local c = { t=cfg.c.default.t, s=cfg.c.default.s }
+local CF = "MC_v28.json"; local cfg = { c={default={t={},s={}}}, a="default", b="RightShift" }; local c = { t=cfg.c.default.t, s=cfg.c.default.s }
 local function save() cfg.c[cfg.a]={t=c.t,s=c.s}; if writefile then pcall(function() writefile(CF, Http:JSONEncode(cfg)) end) end end
 if isfile and readfile and isfile(CF) then local ok, d = pcall(function() return Http:JSONDecode(readfile(CF)) end); if ok and d.c then cfg=d; if cfg.c[cfg.a] then c.t=cfg.c[cfg.a].t; c.s=cfg.c[cfg.a].s end end end
 local bind = Enum.KeyCode[cfg.b] or Enum.KeyCode.RightShift
@@ -36,17 +39,17 @@ local frm = Instance.new("Frame", gui); frm.Size=UDim2.new(0,600,0,420); frm.Pos
 Instance.new("UICorner", frm).CornerRadius=UDim.new(0,12); Instance.new("UIStroke", frm).Color=C_ACC
 local uisc = Instance.new("UIScale", frm); uisc.Scale = 0.9
 
--- 💧 ВАТЕРМАРК (FPS + ВРЕМЯ)
+-- 💧 ПЕРЕДВИГАЕМЫЙ ВАТЕРМАРК
 local wmFrame = Instance.new("Frame", gui)
 wmFrame.Size = UDim2.new(0, 160, 0, 26)
 wmFrame.Position = UDim2.new(0.5, -80, 1, -36)
 wmFrame.BackgroundColor3 = C_BG
 wmFrame.BackgroundTransparency = 0.2
 wmFrame.BorderSizePixel = 0
+wmFrame.Active = true
+wmFrame.Draggable = true -- Делает его перетаскиваемым
 Instance.new("UICorner", wmFrame).CornerRadius = UDim.new(0, 6)
-local wmStroke = Instance.new("UIStroke", wmFrame)
-wmStroke.Color = C_ACC
-wmStroke.Thickness = 1
+local wmStroke = Instance.new("UIStroke", wmFrame); wmStroke.Color = C_ACC; wmStroke.Thickness = 1
 local wmText = Instance.new("TextLabel", wmFrame)
 wmText.Size = UDim2.fromScale(1, 1)
 wmText.BackgroundTransparency = 1
@@ -62,8 +65,7 @@ RS.RenderStepped:Connect(function()
         local fps = math.floor(fpsCount / (tick() - fpsTimer))
         fpsCount = 0
         fpsTimer = tick()
-        local time = os.date("%H:%M:%S")
-        wmText.Text = string.format("FPS: %d | %s", fps, time)
+        wmText.Text = string.format("FPS: %d | %s", fps, os.date("%H:%M:%S"))
     end
 end)
 
@@ -122,17 +124,31 @@ end
 local function getHum() local ch=player.Character; return ch and ch:FindFirstChildOfClass("Humanoid") end
 local function getTeam(p) return p.Team and p.Team.TeamColor.Color or C_ACC end
 
--- ЛОГИКА (Фикс спринта)
+-- ФИКС СПРИНТА (Используем IsKeyDown + Принудительное применение)
 local fK = {W=false, A=false, S=false, D=false, Space=false, Ctrl=false}
 local sprintOn, sprintSpd, baseSpeed = false, 60, 16
 local flyAct, bv, bg, fSpd = false, nil, nil, 50
 local function setFly(on) if bv then bv:Destroy() end; if bg then bg:Destroy() end; local ch, hu = player.Character, getHum(); if hu then hu.PlatformStand=false end; flyAct=false; if on and ch and hu then local hrp=ch:FindFirstChild("HumanoidRootPart"); if hrp then bv=Instance.new("BodyVelocity",hrp); bv.MaxForce=Vector3.new(9e9,9e9,9e9); bg=Instance.new("BodyGyro",hrp); bg.MaxTorque=Vector3.new(9e9,9e9,9e9); bg.P=10000; hu.PlatformStand=true; flyAct=true end end end
+
 local infJ, noclp, bhop, spin, sSpd, freecam, fPos, fRot, clickTP, antiAfk, autoResp, chams, chamsCol = false, false, false, false, 5, false, nil, nil, false, false, false, false, Color3.fromRGB(255,50,50)
 local wallClimb, wallClimbBV = false, nil
+local antiFling, hipHeight = false, 2
 
 RS.Stepped:Connect(function()
     local hu = getHum()
-    if hu and not flyAct then if sprintOn then if UIS:IsKeyDown(Enum.KeyCode.LeftShift) then hu.WalkSpeed = sprintSpd else hu.WalkSpeed = baseSpeed end else hu.WalkSpeed = baseSpeed end end
+    if hu and not flyAct then
+        -- Жесткий фикс спринта
+        if sprintOn and UIS:IsKeyDown(Enum.KeyCode.LeftShift) then hu.WalkSpeed = sprintSpd 
+        else hu.WalkSpeed = baseSpeed end
+    end
+    
+    if antiFling and hu then
+        hu:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
+        hu:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
+    else
+        if hu then hu:SetStateEnabled(Enum.HumanoidStateType.FallingDown, true); hu:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, true) end
+    end
+
     if noclp then local ch=player.Character; if ch then for _,p in ipairs(ch:GetDescendants()) do if p:IsA("BasePart") then p.CanCollide=false end end end end
     if bhop then if hu and (hu:GetState()==Enum.HumanoidStateType.Landed or hu:GetState()==Enum.HumanoidStateType.Running) then hu:ChangeState(Enum.HumanoidStateType.Jumping) end end
     if spin then local hrp=player.Character and player.Character:FindFirstChild("HumanoidRootPart"); if hrp then hrp.CFrame=hrp.CFrame*CFrame.Angles(0,math.rad(sSpd),0) end end
@@ -209,15 +225,19 @@ toggle(vS, "Health Bars", function() espHp=true; clrEsp() end, function() espHp=
 toggle(vS, "Distance", function() espDs=true; clrEsp() end, function() espDs=false; clrEsp() end)
 sect(vS, "Rendering")
 toggle(vS, "Fullbright", function() Lgt.Brightness=2; Lgt.Ambient=Color3.new(1,1,1); Lgt.OutdoorAmbient=Color3.new(1,1,1) end, function() Lgt.Brightness=1; Lgt.Ambient=Color3.fromRGB(70,70,70) end)
+slider(vS, "Time of Day", 0, 24, 14, function(v) Lgt.ClockTime = v end)
+slider(vS, "Camera FOV", 50, 120, 70, function(v) cam.FieldOfView = v end)
 toggle(vS, "Chams (Color)", function() chams=true end, function() chams=false end)
 
 local mS = tabs["Movement"].s
 sect(mS, "Speed & Jump")
 slider(mS, "WalkSpeed (Base)", 16, 250, 16, function(v) baseSpeed=v end)
 slider(mS, "JumpPower", 50, 400, 50, function(v) local h=getHum(); if h then h.JumpPower=v end end)
+slider(mS, "Hip Height", 0, 20, 2, function(v) local h=getHum(); if h then h.HipHeight=v end end)
 toggle(mS, "Infinite Jump", function() infJ=true end, function() infJ=false end)
 toggle(mS, "Noclip", function() noclp=true end, function() noclp=false end)
 toggle(mS, "Bhop", function() bhop=true end, function() bhop=false end)
+toggle(mS, "Anti-Fling", function() antiFling=true end, function() antiFling=false end)
 sect(mS, "Sprint (Shift)")
 toggle(mS, "Enable Sprint", function() sprintOn=true end, function() sprintOn=false end)
 slider(mS, "Sprint Speed", 20, 250, 60, function(v) sprintSpd=v end)
@@ -233,6 +253,7 @@ toggle(uS, "Click TP (Ctrl+LMB)", function() clickTP=true end, function() clickT
 btn(uS, "TP to Spawn", function() local hrp=player.Character and player.Character:FindFirstChild("HumanoidRootPart"); if hrp then for _,o in ipairs(workspace:GetDescendants()) do if o:IsA("SpawnLocation") then hrp.CFrame=o.CFrame+Vector3.new(0,5,0); break end end end end)
 sect(uS, "Automation")
 toggle(uS, "Anti-AFK", function() antiAfk=true end, function() antiAfk=false end)
+btn(uS, "Reset / Kill Character", function() local h=getHum(); if h then h.Health=0 end end, C_DNG)
 btn(uS, "Rejoin Server", function() Tp:Teleport(game.PlaceId) end, C_DNG)
 
 local cS2 = tabs["Config"].s
