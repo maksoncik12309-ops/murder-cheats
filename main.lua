@@ -1,3 +1,8 @@
+-- ============================================================
+--  MURDER CHEATS  v10  |  password gate + mouse aim + wallcheck
+--  LocalScript -> StarterPlayerScripts
+--  Password: murder
+-- ============================================================
 local UIS         = game:GetService("UserInputService")
 local RunService  = game:GetService("RunService")
 local Players     = game:GetService("Players")
@@ -13,6 +18,9 @@ local GuiService  = game:GetService("GuiService")
 local player = Players.LocalPlayer
 local cam    = workspace.CurrentCamera
 
+-- ============================================================
+--  ПАЛИТРА
+-- ============================================================
 local C_BG      = Color3.fromRGB(6, 8, 10)
 local C_PANEL   = Color3.fromRGB(16, 20, 24)
 local C_ITEM    = Color3.fromRGB(22, 28, 34)
@@ -23,6 +31,209 @@ local C_DANGER  = Color3.fromRGB(255, 60, 80)
 local C_TEXT    = Color3.fromRGB(230, 240, 245)
 local C_SUB     = Color3.fromRGB(110, 130, 145)
 
+-- ============================================================
+--  🔐 PASSWORD GATE
+-- ============================================================
+local PASSWORD = "murder"
+local passwordCorrect = false
+
+local pg = player:WaitForChild("PlayerGui")
+if pg:FindFirstChild("MC_PasswordGate") then
+    pg.MC_PasswordGate:Destroy()
+end
+
+local pwdGui = Instance.new("ScreenGui")
+pwdGui.Name = "MC_PasswordGate"
+pwdGui.IgnoreGuiInset = true
+pwdGui.ResetOnSpawn = false
+pwdGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+pwdGui.DisplayOrder = 999999
+pwdGui.Parent = pg
+
+local pwdBg = Instance.new("Frame")
+pwdBg.Size = UDim2.new(1, 0, 1, 0)
+pwdBg.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+pwdBg.BackgroundTransparency = 0.3
+pwdBg.BorderSizePixel = 0
+pwdBg.Parent = pwdGui
+
+-- Карточка
+local pwdCard = Instance.new("Frame")
+pwdCard.Size = UDim2.new(0, 360, 0, 260)
+pwdCard.Position = UDim2.new(0.5, -180, 0.5, -130)
+pwdCard.BackgroundColor3 = C_BG
+pwdCard.BorderSizePixel = 0
+pwdCard.Active = true
+pwdCard.Parent = pwdBg
+Instance.new("UICorner", pwdCard).CornerRadius = UDim.new(0, 14)
+
+local pwdStroke = Instance.new("UIStroke", pwdCard)
+pwdStroke.Color = C_ACCENT
+pwdStroke.Thickness = 2
+pwdStroke.Transparency = 0.2
+
+-- Пульсация
+task.spawn(function()
+    while pwdCard.Parent do
+        TweenService:Create(pwdStroke, TweenInfo.new(1.2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut),
+            {Transparency = 0.75}):Play()
+        task.wait(1.2)
+        TweenService:Create(pwdStroke, TweenInfo.new(1.2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut),
+            {Transparency = 0.2}):Play()
+        task.wait(1.2)
+    end
+end)
+
+-- Заголовок
+local pwdTitle = Instance.new("TextLabel")
+pwdTitle.Size = UDim2.new(1, -32, 0, 34)
+pwdTitle.Position = UDim2.new(0, 16, 0, 20)
+pwdTitle.BackgroundTransparency = 1
+pwdTitle.Font = Enum.Font.GothamBlack
+pwdTitle.TextSize = 22
+pwdTitle.RichText = true
+pwdTitle.Text = '<font color="#00FF96">MURDER</font> <font color="#FFA03C">CHEATS</font>'
+pwdTitle.TextXAlignment = Enum.TextXAlignment.Left
+pwdTitle.Parent = pwdCard
+
+local pwdSub = Instance.new("TextLabel")
+pwdSub.Size = UDim2.new(1, -32, 0, 16)
+pwdSub.Position = UDim2.new(0, 16, 0, 58)
+pwdSub.BackgroundTransparency = 1
+pwdSub.Font = Enum.Font.Code
+pwdSub.TextSize = 11
+pwdSub.TextColor3 = C_SUB
+pwdSub.TextXAlignment = Enum.TextXAlignment.Left
+pwdSub.Text = "enter password to unlock"
+pwdSub.Parent = pwdCard
+
+-- Поле ввода
+local pwdInput = Instance.new("TextBox")
+pwdInput.Size = UDim2.new(1, -32, 0, 40)
+pwdInput.Position = UDim2.new(0, 16, 0, 96)
+pwdInput.BackgroundColor3 = C_ITEM
+pwdInput.BorderSizePixel = 0
+pwdInput.Font = Enum.Font.Code
+pwdInput.TextSize = 16
+pwdInput.TextColor3 = C_TEXT
+pwdInput.PlaceholderText = "password..."
+pwdInput.PlaceholderColor3 = C_SUB
+pwdInput.Text = ""
+pwdInput.ClearTextOnFocus = false
+pwdInput.Parent = pwdCard
+Instance.new("UICorner", pwdInput).CornerRadius = UDim.new(0, 8)
+
+local pwdInputStroke = Instance.new("UIStroke", pwdInput)
+pwdInputStroke.Color = C_ACCENT
+pwdInputStroke.Thickness = 1
+pwdInputStroke.Transparency = 0.5
+
+-- Кнопка "Unlock"
+local pwdBtn = Instance.new("TextButton")
+pwdBtn.Size = UDim2.new(1, -32, 0, 40)
+pwdBtn.Position = UDim2.new(0, 16, 0, 148)
+pwdBtn.BackgroundColor3 = C_ACCENT
+pwdBtn.BorderSizePixel = 0
+pwdBtn.AutoButtonColor = false
+pwdBtn.Font = Enum.Font.GothamBold
+pwdBtn.TextSize = 14
+pwdBtn.TextColor3 = C_BG
+pwdBtn.Text = "UNLOCK"
+pwdBtn.Parent = pwdCard
+Instance.new("UICorner", pwdBtn).CornerRadius = UDim.new(0, 8)
+
+-- Статус
+local pwdStatus = Instance.new("TextLabel")
+pwdStatus.Size = UDim2.new(1, -32, 0, 18)
+pwdStatus.Position = UDim2.new(0, 16, 1, -28)
+pwdStatus.BackgroundTransparency = 1
+pwdStatus.Font = Enum.Font.GothamBold
+pwdStatus.TextSize = 12
+pwdStatus.TextColor3 = C_DANGER
+pwdStatus.TextXAlignment = Enum.TextXAlignment.Left
+pwdStatus.Text = ""
+pwdStatus.Parent = pwdCard
+
+local submitting = false
+
+local function shakeCard()
+    local origPos = pwdCard.Position
+    for i = 1, 8 do
+        local offset = (i % 2 == 0) and 8 or -8
+        TweenService:Create(pwdCard, TweenInfo.new(0.05),
+            {Position = origPos + UDim2.new(0, offset, 0, 0)}):Play()
+        task.wait(0.05)
+    end
+    TweenService:Create(pwdCard, TweenInfo.new(0.1),
+        {Position = origPos}):Play()
+end
+
+local function tryUnlock()
+    if submitting then return end
+    submitting = true
+    if pwdInput.Text == PASSWORD then
+        -- Успех
+        pwdStatus.TextColor3 = C_ACCENT
+        pwdStatus.Text = "✓ access granted"
+        pwdBtn.Text = "LOADING..."
+        pwdBtn.BackgroundColor3 = C_ACCENT
+
+        TweenService:Create(pwdStroke, TweenInfo.new(0.15), {Transparency = 0, Thickness = 4}):Play()
+
+        task.wait(0.5)
+
+        local fade = TweenService:Create(pwdCard, TweenInfo.new(0.35), {
+            BackgroundTransparency = 1,
+            Size = UDim2.new(0, 320, 0, 220),
+        })
+        fade:Play()
+        pwdTitle.TextTransparency = 0
+        TweenService:Create(pwdTitle, TweenInfo.new(0.3), {TextTransparency = 1}):Play()
+        TweenService:Create(pwdSub,   TweenInfo.new(0.3), {TextTransparency = 1}):Play()
+        TweenService:Create(pwdInput, TweenInfo.new(0.3), {BackgroundTransparency = 1, TextTransparency = 1}):Play()
+        TweenService:Create(pwdBtn,   TweenInfo.new(0.3), {BackgroundTransparency = 1, TextTransparency = 1}):Play()
+        TweenService:Create(pwdStatus,TweenInfo.new(0.3), {TextTransparency = 1}):Play()
+        TweenService:Create(pwdInputStroke, TweenInfo.new(0.3), {Transparency = 1}):Play()
+        TweenService:Create(pwdBg, TweenInfo.new(0.35), {BackgroundTransparency = 1}):Play()
+        task.wait(0.4)
+        pwdGui:Destroy()
+        passwordCorrect = true
+    else
+        -- Ошибка
+        pwdStatus.TextColor3 = C_DANGER
+        pwdStatus.Text = "✕ wrong password"
+        pwdInputStroke.Color = C_DANGER
+        pwdInputStroke.Transparency = 0
+        shakeCard()
+        task.wait(0.6)
+        pwdInputStroke.Color = C_ACCENT
+        pwdInputStroke.Transparency = 0.5
+        pwdInput.Text = ""
+        submitting = false
+    end
+end
+
+pwdBtn.MouseButton1Click:Connect(tryUnlock)
+pwdInput.FocusLost:Connect(tryUnlock)
+pwdInput.Focused:Connect(function()
+    pwdInputStroke.Transparency = 0
+    pwdInputStroke.Thickness = 2
+end)
+
+-- Плавное появление
+pwdCard.BackgroundTransparency = 1
+local appear = TweenService:Create(pwdCard, TweenInfo.new(0.3), {BackgroundTransparency = 0})
+pwdCard.Size = UDim2.new(0, 320, 0, 220)
+appear:Play()
+TweenService:Create(pwdCard, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
+    {Size = UDim2.new(0, 360, 0, 260)}):Play()
+
+-- ⏳ Блокируем весь дальнейший код, пока пароль не введён
+repeat task.wait(0.1) until passwordCorrect
+
+-- ============================================================
+--  КОНФИГ
+-- ============================================================
 local CONFIG_FILE = "MurderCheats_config.json"
 local config = { toggles = {}, sliders = {}, menuBind = "RightShift" }
 local lastFlash = 0
@@ -41,12 +252,15 @@ if isfile and readfile and isfile(CONFIG_FILE) then
 end
 local menuBind = Enum.KeyCode[config.menuBind] or Enum.KeyCode.RightShift
 
+-- ============================================================
+--  GUI
+-- ============================================================
 local gui = Instance.new("ScreenGui")
 gui.Name = "MurderCheats"
 gui.ResetOnSpawn = false
 gui.IgnoreGuiInset = true
 gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-gui.Parent = player:WaitForChild("PlayerGui")
+gui.Parent = pg
 
 local watermark = Instance.new("TextLabel")
 watermark.Size = UDim2.new(0, 180, 0, 22)
@@ -55,7 +269,7 @@ watermark.BackgroundTransparency = 1
 watermark.Font = Enum.Font.GothamBold
 watermark.TextSize = 12
 watermark.RichText = true
-watermark.Text = '<font color="#00FF96">●</font> MURDER CHEATS  <font color="#FFA03C">v9</font>'
+watermark.Text = '<font color="#00FF96">●</font> MURDER CHEATS  <font color="#FFA03C">v10</font>'
 watermark.TextXAlignment = Enum.TextXAlignment.Left
 watermark.Parent = gui
 
@@ -79,6 +293,16 @@ local fStroke = Instance.new("UIStroke", frame)
 fStroke.Color = C_ACCENT
 fStroke.Thickness = 1.5
 fStroke.Transparency = 0.35
+
+-- Пульсирующая обводка
+task.spawn(function()
+    local phase = 0
+    while gui.Parent do
+        phase = (phase + 0.03) % 1
+        fStroke.Color = Color3.fromHSV(0.4 + 0.15 * math.sin(phase * math.pi * 2), 0.8, 1)
+        task.wait(0.05)
+    end
+end)
 
 local sidebar = Instance.new("Frame")
 sidebar.Size = UDim2.new(0, 140, 1, -20)
@@ -496,7 +720,7 @@ local function getTeamColor(p)
 end
 
 -- ============================================================
---  FLY
+--  FLY / INF JUMP / NOCLIP / SPRINT
 -- ============================================================
 local flyKeys = {W=false, A=false, S=false, D=false, Space=false, LCtrl=false}
 local flyActive, flyBV, flyBG = false, nil, nil
@@ -544,9 +768,6 @@ RunService.RenderStepped:Connect(function()
     flyBG.CFrame = cam.CFrame
 end)
 
--- ============================================================
---  INF JUMP / NOCLIP / SPRINT
--- ============================================================
 local infJumpOn = false
 UIS.JumpRequest:Connect(function()
     if infJumpOn then local h = getHum(); if h then h:ChangeState(Enum.HumanoidStateType.Jumping) end end
@@ -582,7 +803,7 @@ RunService.Heartbeat:Connect(function()
 end)
 
 -- ============================================================
---  FULLBRIGHT / POSTFX
+--  FULLBRIGHT / POSTFX / ATMOSPHERE
 -- ============================================================
 local origB, origA, origO
 local function setFullbright(on)
@@ -609,6 +830,21 @@ local function setNoPost(on)
         for e in pairs(postDisabled) do if e.Parent then e.Enabled = true end end
         postDisabled = {}
     end
+end
+
+local atmosIdx = 1
+local atmosPresets = {
+    { name = "Default", ambient = Color3.fromRGB(70,70,70),   out = Color3.fromRGB(128,128,128), bright = 2,   clock = 14 },
+    { name = "Night",   ambient = Color3.fromRGB(15,20,40),   out = Color3.fromRGB(20,25,50),    bright = 0.3, clock = 0 },
+    { name = "Dusk",    ambient = Color3.fromRGB(90,60,80),   out = Color3.fromRGB(120,80,100),  bright = 1,   clock = 18 },
+    { name = "Red",     ambient = Color3.fromRGB(120,20,20),  out = Color3.fromRGB(160,40,40),   bright = 1,   clock = 14 },
+}
+local function applyAtmos()
+    local p = atmosPresets[atmosIdx]
+    Lighting.Ambient = p.ambient
+    Lighting.OutdoorAmbient = p.out
+    Lighting.Brightness = p.bright
+    Lighting.ClockTime = p.clock
 end
 
 -- ============================================================
@@ -730,7 +966,7 @@ task.spawn(function()
 end)
 
 -- ============================================================
---  TRACERS + SKELETON ESP (Drawing)
+--  TRACERS / SKELETON
 -- ============================================================
 local tracerOn = false
 local skeletonOn = false
@@ -834,7 +1070,7 @@ local function clearSkeleton()
 end
 
 -- ============================================================
---  CHAMS / SELF OUTLINE / NAMETAG / CHINA HAT
+--  CHAMS / OUTLINE / NAMETAG / HAT / CROSSHAIR
 -- ============================================================
 local chamsOn = false
 local chamsColor = Color3.fromRGB(0, 255, 150)
@@ -923,7 +1159,7 @@ local function setCrosshair(on)
         crosshairGui.Name = "MCCrosshair"
         crosshairGui.IgnoreGuiInset = true
         crosshairGui.ResetOnSpawn = false
-        crosshairGui.Parent = player:WaitForChild("PlayerGui")
+        crosshairGui.Parent = pg
         local function mkLine(sx, sy, px, py)
             local f = Instance.new("Frame")
             f.Size = UDim2.new(0, sx, 0, sy)
@@ -943,25 +1179,7 @@ local function setCrosshair(on)
 end
 
 -- ============================================================
---  ATMOSPHERE
--- ============================================================
-local atmosIdx = 1
-local atmosPresets = {
-    { name = "Default", ambient = Color3.fromRGB(70,70,70),   out = Color3.fromRGB(128,128,128), bright = 2,   clock = 14 },
-    { name = "Night",   ambient = Color3.fromRGB(15,20,40),   out = Color3.fromRGB(20,25,50),    bright = 0.3, clock = 0 },
-    { name = "Dusk",    ambient = Color3.fromRGB(90,60,80),   out = Color3.fromRGB(120,80,100),  bright = 1,   clock = 18 },
-    { name = "Red",     ambient = Color3.fromRGB(120,20,20),  out = Color3.fromRGB(160,40,40),   bright = 1,   clock = 14 },
-}
-local function applyAtmos()
-    local p = atmosPresets[atmosIdx]
-    Lighting.Ambient = p.ambient
-    Lighting.OutdoorAmbient = p.out
-    Lighting.Brightness = p.bright
-    Lighting.ClockTime = p.clock
-end
-
--- ============================================================
---  HITBOX (умеренный размер + коллизия + регулируемая прозрачность)
+--  HITBOX
 -- ============================================================
 local hitboxOn = false
 local hitboxScale = 1.6
@@ -981,8 +1199,7 @@ local function applyHitbox()
                         part:SetAttribute("origTransparency", part.Transparency)
                         part:SetAttribute("origCanCollide", part.CanCollide)
                     end
-                    local orig = part:GetAttribute("origSize")
-                    part.Size = orig * hitboxScale
+                    part.Size = part:GetAttribute("origSize") * hitboxScale
                     part.Transparency = hitboxTransparency
                     part.CanCollide = true
                 end
@@ -990,7 +1207,6 @@ local function applyHitbox()
         end
     end
 end
-
 local function restoreHitbox()
     for _, p in ipairs(Players:GetPlayers()) do
         if p.Character then
@@ -1010,7 +1226,7 @@ end
 RunService.Heartbeat:Connect(applyHitbox)
 
 -- ============================================================
---  AIMBOT / TRIGGER  (mouse-based)
+--  AIM (mouse-based + wallcheck)
 -- ============================================================
 local aimOn, aimAutoShoot, aimKeyHeld, aimWallcheck, aimSnap = false, false, false, false, false
 local aimHold = Enum.UserInputType.MouseButton2
@@ -1021,17 +1237,14 @@ local aimBodyParts = {"Head", "HumanoidRootPart", "UpperTorso"}
 local aimPrediction = 0
 local aimPriority = "Nearest"
 local priorityList = {"Nearest", "Lowest HP", "Highest HP"}
-
 local triggerOn, triggerFOV = false, 30
 
--- Смещение GUI-инсета (нужно для правильного mouse->viewport)
 local topInset = 36
 pcall(function() topInset = GuiService:GetGuiInset().Y end)
 local function getMouseViewport()
     return UIS:GetMouseLocation() - Vector2.new(0, topInset)
 end
 
--- FOV-круг: следует за мышью
 local fovCircle = Instance.new("Frame")
 fovCircle.Size = UDim2.new(0, aimFOV*2, 0, aimFOV*2)
 fovCircle.Position = UDim2.fromOffset(0, 0)
@@ -1049,19 +1262,14 @@ local function hasLOS(part)
     local params = RaycastParams.new()
     params.FilterType = Enum.RaycastFilterType.Exclude
     params.FilterDescendantsInstances = {player.Character}
-    local dir = part.Position - origin
-    local res = workspace:Raycast(origin, dir, params)
-    if res and res.Instance then
-        return res.Instance:IsDescendantOf(part.Parent)
-    end
+    local res = workspace:Raycast(origin, part.Position - origin, params)
+    if res and res.Instance then return res.Instance:IsDescendantOf(part.Parent) end
     return true
 end
-
 local function predictPos(part)
     if aimPrediction <= 0 then return part.Position end
     return part.Position + part.AssemblyLinearVelocity * aimPrediction
 end
-
 local function getTarget(fovOverride)
     cam = workspace.CurrentCamera
     local mousePos = getMouseViewport()
@@ -1094,41 +1302,33 @@ local function getTarget(fovOverride)
     end
     return best
 end
-
 RunService.RenderStepped:Connect(function()
-    -- FOV-круг следует за мышью
     if fovCircle.Visible then
-        local mouse = UIS:GetMouseLocation()
-        fovCircle.Position = UDim2.fromOffset(mouse.X, mouse.Y)
+        local m = UIS:GetMouseLocation()
+        fovCircle.Position = UDim2.fromOffset(m.X, m.Y)
     end
     if aimOn and aimKeyHeld then
         local target = getTarget()
         if target then
             cam = workspace.CurrentCamera
-            local wanted = CFrame.new(cam.CFrame.Position, predictPos(target))
-            cam.CFrame = cam.CFrame:Lerp(wanted, 1 - math.clamp(aimSmooth, 0, 0.99))
+            cam.CFrame = cam.CFrame:Lerp(CFrame.new(cam.CFrame.Position, predictPos(target)),
+                1 - math.clamp(aimSmooth, 0, 0.99))
         end
     end
     if triggerOn then
-        local target = getTarget(triggerFOV)
-        if target then
+        if getTarget(triggerFOV) then
             VirtualUser:CaptureController()
             VirtualUser:ClickButton1(Vector2.new(cam.ViewportSize.X/2, cam.ViewportSize.Y/2))
         end
     end
 end)
-
 UIS.InputBegan:Connect(function(input, gp)
     if gp then return end
     if aimSnap and input.UserInputType == Enum.UserInputType.MouseButton1 then
-        local target = getTarget()
-        if target then
-            cam = workspace.CurrentCamera
-            cam.CFrame = CFrame.new(cam.CFrame.Position, predictPos(target))
-        end
+        local t = getTarget()
+        if t then cam.CFrame = CFrame.new(cam.CFrame.Position, predictPos(t)) end
     end
 end)
-
 task.spawn(function()
     while gui.Parent do
         task.wait(0.05)
@@ -1140,7 +1340,7 @@ task.spawn(function()
 end)
 
 -- ============================================================
---  FREECAM / CLICK TP / AUTO RESPAWN / SPIN
+--  FREECAM / CLICK TP / RESPAWN / SPIN / BODY
 -- ============================================================
 local freecamOn = false
 local freecamPos, freecamLook
@@ -1183,8 +1383,8 @@ UIS.InputBegan:Connect(function(input, gp)
     if gp then return end
     if clickTPOn and ctrlHeld and input.UserInputType == Enum.UserInputType.MouseButton1 then
         cam = workspace.CurrentCamera
-        local mouse = UIS:GetMouseLocation()
-        local ray = cam:ViewportPointToRay(mouse.X, mouse.Y)
+        local m = UIS:GetMouseLocation()
+        local ray = cam:ViewportPointToRay(m.X, m.Y)
         local params = RaycastParams.new()
         params.FilterDescendantsInstances = {player.Character}
         params.FilterType = Enum.RaycastFilterType.Exclude
@@ -1227,7 +1427,6 @@ end
 --  SAVE/LOAD POS / BHOP / LONG JUMP / WALL CLIMB / SPEED
 -- ============================================================
 local savedPosition = nil
-
 local bhopOn = false
 RunService.Heartbeat:Connect(function()
     if not bhopOn then return end
@@ -1238,7 +1437,6 @@ RunService.Heartbeat:Connect(function()
         h:ChangeState(Enum.HumanoidStateType.Jumping)
     end
 end)
-
 local longJumpOn = false
 UIS.JumpRequest:Connect(function()
     if longJumpOn then
@@ -1252,7 +1450,6 @@ UIS.JumpRequest:Connect(function()
         end
     end
 end)
-
 local wallClimbOn = false
 local wallClimbBV
 RunService.Heartbeat:Connect(function()
@@ -1275,14 +1472,12 @@ RunService.Heartbeat:Connect(function()
         if wallClimbBV then wallClimbBV:Destroy(); wallClimbBV = nil end
     end
 end)
-
 local speedBoostOn, speedBoostVal = false, 50
 RunService.Heartbeat:Connect(function()
     if not speedBoostOn then return end
     local h = getHum()
     if h then h.WalkSpeed = speedBoostVal end
 end)
-
 local antiafkOn = false
 player.Idled:Connect(function()
     if not antiafkOn then return end
@@ -1291,7 +1486,6 @@ player.Idled:Connect(function()
     task.wait(1)
     VirtualUser:Button2Up(Vector2.new(0,0))
 end)
-
 local spectateIdx = 1
 local function spectateNext()
     local list = {}
@@ -1311,7 +1505,7 @@ end
 local playerListGui = Instance.new("ScreenGui")
 playerListGui.Name = "MCPlayerList"
 playerListGui.ResetOnSpawn = false
-playerListGui.Parent = player:WaitForChild("PlayerGui")
+playerListGui.Parent = pg
 local playerListFrame = Instance.new("Frame")
 playerListFrame.Size = UDim2.new(0, 220, 0, 260)
 playerListFrame.Position = UDim2.new(1, -232, 0, 40)
@@ -1443,7 +1637,7 @@ local function showUnloadConfirm()
     lbl.TextColor3 = C_TEXT
     lbl.TextWrapped = true
     lbl.RichText = true
-    lbl.Text = 'Точно ли вырубить чит?\n<font size="12" color="#6E8291">Все функции будут отключены, меню закроется.\nВернуть — только перезапуском скрипта.</font>'
+    lbl.Text = 'Точно ли вырубить чит?\n<font size="12" color="#6E8291">Все функции будут отключены.\nВернуть — только перезапуском скрипта.</font>'
     lbl.ZIndex = 102
     lbl.Parent = dialog
 
@@ -1480,7 +1674,7 @@ local function showUnloadConfirm()
 end
 
 -- ============================================================
---  COMBAT
+--  COMBAT TAB
 -- ============================================================
 local cScroll = tabs["Combat"].scroll
 section(cScroll, "Aimbot")
@@ -1518,9 +1712,7 @@ do
 end
 
 section(cScroll, "Trigger Bot")
-createToggle(cScroll, "Trigger Bot (авто-клик при наведении)",
-    function() triggerOn = true end,
-    function() triggerOn = false end)
+createToggle(cScroll, "Trigger Bot", function() triggerOn = true end, function() triggerOn = false end)
 createSlider(cScroll, "Trigger FOV", 5, 200, 30, function(v) triggerFOV = v end)
 
 section(cScroll, "Hitbox")
@@ -1537,40 +1729,24 @@ createSlider(cScroll, "Hitbox Transparency", 0, 0.9, 0.5, function(v)
 end)
 
 -- ============================================================
---  VISUALS
+--  VISUALS TAB
 -- ============================================================
 local vScroll = tabs["Visuals"].scroll
 section(vScroll, "ESP")
-createToggle(vScroll, "Wallhack / ESP",
-    function() espOn = true end,
-    function() espOn = false; clearESP() end)
-createToggle(vScroll, "Only enemies",
-    function() espTeamChk = true; clearESP() end,
-    function() espTeamChk = false; clearESP() end)
-createToggle(vScroll, "Player names",
-    function() espNames = true; clearESP() end,
-    function() espNames = false; clearESP() end)
-createToggle(vScroll, "Health bars",
-    function() espHP = true; clearESP() end,
-    function() espHP = false; clearESP() end)
-createToggle(vScroll, "Distance labels",
-    function() espDist = true; clearESP() end,
-    function() espDist = false; clearESP() end)
-createToggle(vScroll, "Rainbow ESP",
-    function() rainbowEsp = true end,
-    function() rainbowEsp = false end)
-createToggle(vScroll, "Tracers (линии к игрокам)",
-    function()
-        if not hasDrawing then warn("[Murder Cheats] Drawing API недоступен"); return end
-        tracerOn = true
-    end,
-    function() tracerOn = false; clearTracers() end)
-createToggle(vScroll, "Skeleton ESP (кости)",
-    function()
-        if not hasDrawing then warn("[Murder Cheats] Drawing API недоступен"); return end
-        skeletonOn = true
-    end,
-    function() skeletonOn = false; clearSkeleton() end)
+createToggle(vScroll, "Wallhack / ESP", function() espOn = true end, function() espOn = false; clearESP() end)
+createToggle(vScroll, "Only enemies", function() espTeamChk = true; clearESP() end, function() espTeamChk = false; clearESP() end)
+createToggle(vScroll, "Player names", function() espNames = true; clearESP() end, function() espNames = false; clearESP() end)
+createToggle(vScroll, "Health bars", function() espHP = true; clearESP() end, function() espHP = false; clearESP() end)
+createToggle(vScroll, "Distance labels", function() espDist = true; clearESP() end, function() espDist = false; clearESP() end)
+createToggle(vScroll, "Rainbow ESP", function() rainbowEsp = true end, function() rainbowEsp = false end)
+createToggle(vScroll, "Tracers", function()
+    if not hasDrawing then warn("[Murder Cheats] Drawing API недоступен"); return end
+    tracerOn = true
+end, function() tracerOn = false; clearTracers() end)
+createToggle(vScroll, "Skeleton ESP", function()
+    if not hasDrawing then warn("[Murder Cheats] Drawing API недоступен"); return end
+    skeletonOn = true
+end, function() skeletonOn = false; clearSkeleton() end)
 
 section(vScroll, "Rendering")
 createToggle(vScroll, "Fullbright", function() setFullbright(true) end, function() setFullbright(false) end)
@@ -1579,20 +1755,12 @@ createSlider(vScroll, "Field of View", 50, 130, 70, function(v) if cam then cam.
 
 section(vScroll, "Character")
 createToggle(vScroll, "Chams", function() chamsOn = true end, function() chamsOn = false end)
-createToggle(vScroll, "Self outline",
-    function() setSelfOutline(true) end,
-    function() setSelfOutline(false) end)
-createToggle(vScroll, "Self nametag",
-    function() setNametag(true) end,
-    function() setNametag(false) end)
-createToggle(vScroll, "China Hat",
-    function() setChinaHat(true) end,
-    function() setChinaHat(false) end)
+createToggle(vScroll, "Self outline", function() setSelfOutline(true) end, function() setSelfOutline(false) end)
+createToggle(vScroll, "Self nametag", function() setNametag(true) end, function() setNametag(false) end)
+createToggle(vScroll, "China Hat", function() setChinaHat(true) end, function() setChinaHat(false) end)
 
 section(vScroll, "HUD")
-createToggle(vScroll, "Custom Crosshair",
-    function() setCrosshair(true) end,
-    function() setCrosshair(false) end)
+createToggle(vScroll, "Custom Crosshair", function() setCrosshair(true) end, function() setCrosshair(false) end)
 createToggle(vScroll, "Player List",
     function() playerListFrame.Visible = true end,
     function() playerListFrame.Visible = false end)
@@ -1608,7 +1776,7 @@ do
 end
 
 -- ============================================================
---  MOVEMENT
+--  MOVEMENT TAB
 -- ============================================================
 local mScroll = tabs["Movement"].scroll
 section(mScroll, "Speed")
@@ -1619,8 +1787,7 @@ createToggle(mScroll, "Enable Sprint",
     function() sprintOn = true end,
     function() sprintOn = false; local h = getHum() if h then h.WalkSpeed = sliderRegistry["Speed"].getValue() end end)
 createToggle(mScroll, "Speed Boost (постоянный)",
-    function() speedBoostOn = true end,
-    function() speedBoostOn = false end)
+    function() speedBoostOn = true end, function() speedBoostOn = false end)
 createSlider(mScroll, "Speed Boost Value", 20, 300, 50, function(v) speedBoostVal = v end)
 
 section(mScroll, "Utility Moves")
@@ -1636,50 +1803,43 @@ createToggle(mScroll, "Noclip",
             end
         end
     end)
-createToggle(mScroll, "Bhop (auto jump)", function() bhopOn = true end, function() bhopOn = false end)
+createToggle(mScroll, "Bhop", function() bhopOn = true end, function() bhopOn = false end)
 createToggle(mScroll, "Long Jump", function() longJumpOn = true end, function() longJumpOn = false end)
-createToggle(mScroll, "Wall Climb (W+A/D у стены)", function() wallClimbOn = true end, function() wallClimbOn = false end)
-createToggle(mScroll, "Freecam (WASD)",
-    function() setFreecam(true) end,
-    function() setFreecam(false) end)
+createToggle(mScroll, "Wall Climb", function() wallClimbOn = true end, function() wallClimbOn = false end)
+createToggle(mScroll, "Freecam (WASD)", function() setFreecam(true) end, function() setFreecam(false) end)
 createToggle(mScroll, "Click TP (Ctrl+LMB)", function() clickTPOn = true end, function() clickTPOn = false end)
 createToggle(mScroll, "Auto Respawn", function() autoRespawnOn = true; hookAutoRespawn() end, function() autoRespawnOn = false end)
 createToggle(mScroll, "Spin Character", function() spinOn = true end, function() spinOn = false end)
 createSlider(mScroll, "Spin Speed", 1, 30, 5, function(v) spinSpeed = v end)
 
 section(mScroll, "Fly")
-createToggle(mScroll, "Fly (WASD + Space/Ctrl)",
-    function() setFly(true) end,
-    function() setFly(false) end)
+createToggle(mScroll, "Fly (WASD + Space/Ctrl)", function() setFly(true) end, function() setFly(false) end)
 createSlider(mScroll, "Fly Speed", 10, 300, 50, function(v) flySpeed = v end)
 
 section(mScroll, "Body")
 createSlider(mScroll, "Body Scale", 0.3, 5, 1, function(v) applyBodyScale(v) end)
 
 -- ============================================================
---  UTILITY
+--  UTILITY TAB
 -- ============================================================
 local uScroll = tabs["Utility"].scroll
 section(uScroll, "Positions")
 createButton(uScroll, "Save Position", function()
     local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-    if hrp then
-        savedPosition = hrp.CFrame
-        print("[Murder Cheats] Position saved:", tostring(hrp.Position))
-    end
+    if hrp then savedPosition = hrp.CFrame; print("[MC] saved:", tostring(hrp.Position)) end
 end, C_ACCENT)
 createButton(uScroll, "Load Position", function()
     if not savedPosition then return end
     local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
     if hrp then hrp.CFrame = savedPosition end
 end, C_ACCENT)
-createButton(uScroll, "Copy Position (clipboard)", function()
+createButton(uScroll, "Copy Position", function()
     local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
     if hrp then
         local p = hrp.Position
         local s = string.format("Vector3.new(%d, %d, %d)", p.X, p.Y, p.Z)
         if setclipboard then pcall(setclipboard, s) end
-        print("[Murder Cheats] Copied:", s)
+        print("[MC] copied:", s)
     end
 end)
 
@@ -1712,7 +1872,7 @@ createButton(uScroll, "Teleport Up +50", function()
     local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
     if hrp then hrp.CFrame = hrp.CFrame + Vector3.new(0, 50, 0) end
 end)
-createButton(uScroll, "Spectate Next Player", function() spectateNext() end)
+createButton(uScroll, "Spectate Next", function() spectateNext() end)
 createButton(uScroll, "Reset Character", function()
     local h = getHum(); if h then h.Health = 0 end
 end)
@@ -1748,7 +1908,7 @@ task.spawn(function()
 end)
 
 -- ============================================================
---  SETTINGS
+--  SETTINGS TAB
 -- ============================================================
 local sScroll = tabs["Settings"].scroll
 section(sScroll, "Menu Bind")
@@ -1817,7 +1977,9 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- Load saved
+-- ============================================================
+--  ЗАГРУЗКА СОХРАНЁННОГО
+-- ============================================================
 for name, val in pairs(config.toggles) do
     if toggleRegistry[name] and val then toggleRegistry[name].setState(true, false) end
 end
@@ -1825,17 +1987,24 @@ for name, val in pairs(config.sliders) do
     if sliderRegistry[name] then sliderRegistry[name].setValue(val, true, false) end
 end
 
+-- ============================================================
+--  OPEN / CLOSE
+-- ============================================================
 local function openMenu()
     frame.Visible = true
     local base = sliderRegistry["Menu Scale"] and sliderRegistry["Menu Scale"].getValue() or 1
-    uiScale.Scale = base * 0.9
+    uiScale.Scale = base * 0.85
     TweenService:Create(uiScale,
-        TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Scale = base}):Play()
+        TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Scale = base}):Play()
+    TweenService:Create(fStroke, TweenInfo.new(0.2), {Thickness = 3}):Play()
+    task.delay(0.25, function()
+        TweenService:Create(fStroke, TweenInfo.new(0.3), {Thickness = 1.5}):Play()
+    end)
 end
 local function closeMenu()
     local base = sliderRegistry["Menu Scale"] and sliderRegistry["Menu Scale"].getValue() or 1
     local t = TweenService:Create(uiScale,
-        TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Scale = base * 0.9})
+        TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Scale = base * 0.85})
     t:Play()
     t.Completed:Connect(function() frame.Visible = false; uiScale.Scale = base end)
 end
