@@ -1,8 +1,4 @@
--- ============================================================
---  MURDER CHEATS  v10  |  password gate + mouse aim + wallcheck
---  LocalScript -> StarterPlayerScripts
---  Password: murder
--- ============================================================
+
 local UIS         = game:GetService("UserInputService")
 local RunService  = game:GetService("RunService")
 local Players     = game:GetService("Players")
@@ -18,9 +14,7 @@ local GuiService  = game:GetService("GuiService")
 local player = Players.LocalPlayer
 local cam    = workspace.CurrentCamera
 
--- ============================================================
---  ПАЛИТРА
--- ============================================================
+
 local C_BG      = Color3.fromRGB(6, 8, 10)
 local C_PANEL   = Color3.fromRGB(16, 20, 24)
 local C_ITEM    = Color3.fromRGB(22, 28, 34)
@@ -36,11 +30,8 @@ local C_SUB     = Color3.fromRGB(110, 130, 145)
 -- ============================================================
 local PASSWORD = "murder"
 local passwordCorrect = false
-
 local pg = player:WaitForChild("PlayerGui")
-if pg:FindFirstChild("MC_PasswordGate") then
-    pg.MC_PasswordGate:Destroy()
-end
+if pg:FindFirstChild("MC_PasswordGate") then pg.MC_PasswordGate:Destroy() end
 
 local pwdGui = Instance.new("ScreenGui")
 pwdGui.Name = "MC_PasswordGate"
@@ -57,7 +48,6 @@ pwdBg.BackgroundTransparency = 0.3
 pwdBg.BorderSizePixel = 0
 pwdBg.Parent = pwdGui
 
--- Карточка
 local pwdCard = Instance.new("Frame")
 pwdCard.Size = UDim2.new(0, 360, 0, 260)
 pwdCard.Position = UDim2.new(0.5, -180, 0.5, -130)
@@ -68,23 +58,17 @@ pwdCard.Parent = pwdBg
 Instance.new("UICorner", pwdCard).CornerRadius = UDim.new(0, 14)
 
 local pwdStroke = Instance.new("UIStroke", pwdCard)
-pwdStroke.Color = C_ACCENT
-pwdStroke.Thickness = 2
-pwdStroke.Transparency = 0.2
+pwdStroke.Color = C_ACCENT; pwdStroke.Thickness = 2; pwdStroke.Transparency = 0.2
 
--- Пульсация
 task.spawn(function()
     while pwdCard.Parent do
-        TweenService:Create(pwdStroke, TweenInfo.new(1.2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut),
-            {Transparency = 0.75}):Play()
+        TweenService:Create(pwdStroke, TweenInfo.new(1.2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {Transparency = 0.75}):Play()
         task.wait(1.2)
-        TweenService:Create(pwdStroke, TweenInfo.new(1.2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut),
-            {Transparency = 0.2}):Play()
+        TweenService:Create(pwdStroke, TweenInfo.new(1.2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {Transparency = 0.2}):Play()
         task.wait(1.2)
     end
 end)
 
--- Заголовок
 local pwdTitle = Instance.new("TextLabel")
 pwdTitle.Size = UDim2.new(1, -32, 0, 34)
 pwdTitle.Position = UDim2.new(0, 16, 0, 20)
@@ -107,7 +91,6 @@ pwdSub.TextXAlignment = Enum.TextXAlignment.Left
 pwdSub.Text = "enter password to unlock"
 pwdSub.Parent = pwdCard
 
--- Поле ввода
 local pwdInput = Instance.new("TextBox")
 pwdInput.Size = UDim2.new(1, -32, 0, 40)
 pwdInput.Position = UDim2.new(0, 16, 0, 96)
@@ -122,13 +105,9 @@ pwdInput.Text = ""
 pwdInput.ClearTextOnFocus = false
 pwdInput.Parent = pwdCard
 Instance.new("UICorner", pwdInput).CornerRadius = UDim.new(0, 8)
-
 local pwdInputStroke = Instance.new("UIStroke", pwdInput)
-pwdInputStroke.Color = C_ACCENT
-pwdInputStroke.Thickness = 1
-pwdInputStroke.Transparency = 0.5
+pwdInputStroke.Color = C_ACCENT; pwdInputStroke.Thickness = 1; pwdInputStroke.Transparency = 0.5
 
--- Кнопка "Unlock"
 local pwdBtn = Instance.new("TextButton")
 pwdBtn.Size = UDim2.new(1, -32, 0, 40)
 pwdBtn.Position = UDim2.new(0, 16, 0, 148)
@@ -142,7 +121,6 @@ pwdBtn.Text = "UNLOCK"
 pwdBtn.Parent = pwdCard
 Instance.new("UICorner", pwdBtn).CornerRadius = UDim.new(0, 8)
 
--- Статус
 local pwdStatus = Instance.new("TextLabel")
 pwdStatus.Size = UDim2.new(1, -32, 0, 18)
 pwdStatus.Position = UDim2.new(0, 16, 1, -28)
@@ -160,34 +138,25 @@ local function shakeCard()
     local origPos = pwdCard.Position
     for i = 1, 8 do
         local offset = (i % 2 == 0) and 8 or -8
-        TweenService:Create(pwdCard, TweenInfo.new(0.05),
-            {Position = origPos + UDim2.new(0, offset, 0, 0)}):Play()
+        TweenService:Create(pwdCard, TweenInfo.new(0.05), {Position = origPos + UDim2.new(0, offset, 0, 0)}):Play()
         task.wait(0.05)
     end
-    TweenService:Create(pwdCard, TweenInfo.new(0.1),
-        {Position = origPos}):Play()
+    TweenService:Create(pwdCard, TweenInfo.new(0.1), {Position = origPos}):Play()
 end
 
 local function tryUnlock()
     if submitting then return end
     submitting = true
     if pwdInput.Text == PASSWORD then
-        -- Успех
         pwdStatus.TextColor3 = C_ACCENT
         pwdStatus.Text = "✓ access granted"
         pwdBtn.Text = "LOADING..."
-        pwdBtn.BackgroundColor3 = C_ACCENT
-
         TweenService:Create(pwdStroke, TweenInfo.new(0.15), {Transparency = 0, Thickness = 4}):Play()
-
         task.wait(0.5)
-
-        local fade = TweenService:Create(pwdCard, TweenInfo.new(0.35), {
+        TweenService:Create(pwdCard, TweenInfo.new(0.35), {
             BackgroundTransparency = 1,
             Size = UDim2.new(0, 320, 0, 220),
-        })
-        fade:Play()
-        pwdTitle.TextTransparency = 0
+        }):Play()
         TweenService:Create(pwdTitle, TweenInfo.new(0.3), {TextTransparency = 1}):Play()
         TweenService:Create(pwdSub,   TweenInfo.new(0.3), {TextTransparency = 1}):Play()
         TweenService:Create(pwdInput, TweenInfo.new(0.3), {BackgroundTransparency = 1, TextTransparency = 1}):Play()
@@ -199,7 +168,6 @@ local function tryUnlock()
         pwdGui:Destroy()
         passwordCorrect = true
     else
-        -- Ошибка
         pwdStatus.TextColor3 = C_DANGER
         pwdStatus.Text = "✕ wrong password"
         pwdInputStroke.Color = C_DANGER
@@ -212,7 +180,6 @@ local function tryUnlock()
         submitting = false
     end
 end
-
 pwdBtn.MouseButton1Click:Connect(tryUnlock)
 pwdInput.FocusLost:Connect(tryUnlock)
 pwdInput.Focused:Connect(function()
@@ -220,40 +187,79 @@ pwdInput.Focused:Connect(function()
     pwdInputStroke.Thickness = 2
 end)
 
--- Плавное появление
 pwdCard.BackgroundTransparency = 1
-local appear = TweenService:Create(pwdCard, TweenInfo.new(0.3), {BackgroundTransparency = 0})
+TweenService:Create(pwdCard, TweenInfo.new(0.3), {BackgroundTransparency = 0}):Play()
 pwdCard.Size = UDim2.new(0, 320, 0, 220)
-appear:Play()
 TweenService:Create(pwdCard, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out),
     {Size = UDim2.new(0, 360, 0, 260)}):Play()
 
--- ⏳ Блокируем весь дальнейший код, пока пароль не введён
 repeat task.wait(0.1) until passwordCorrect
 
 -- ============================================================
---  КОНФИГ
+--  МУЛЬТИКОНФИГИ
 -- ============================================================
-local CONFIG_FILE = "MurderCheats_config.json"
-local config = { toggles = {}, sliders = {}, menuBind = "RightShift" }
+local CONFIG_FILE = "MurderCheats_configs.json"
+
+local configData = {
+    configs = { default = { toggles = {}, sliders = {} } },
+    active  = "default",
+    menuBind = "RightShift",
+}
+
 local lastFlash = 0
 local flashBadge
 local function saveConfig()
-    if writefile then pcall(function() writefile(CONFIG_FILE, HttpService:JSONEncode(config)) end) end
+    -- Синхронизируем активный конфиг и сохраняем весь configData
+    configData.configs[configData.active] = {
+        toggles = config.toggles,
+        sliders = config.sliders,
+    }
+    if writefile then
+        pcall(function() writefile(CONFIG_FILE, HttpService:JSONEncode(configData)) end)
+    end
     if flashBadge and tick() - lastFlash > 0.5 then lastFlash = tick(); flashBadge() end
 end
+
+-- Загрузка (с миграцией со старого формата)
 if isfile and readfile and isfile(CONFIG_FILE) then
     local ok, data = pcall(function() return HttpService:JSONDecode(readfile(CONFIG_FILE)) end)
     if ok and type(data) == "table" then
-        if type(data.toggles)  == "table" then config.toggles  = data.toggles  end
-        if type(data.sliders)  == "table" then config.sliders  = data.sliders  end
-        if type(data.menuBind) == "string" then config.menuBind = data.menuBind end
+        if data.configs and data.active then
+            if type(data.configs) == "table" then configData.configs = data.configs end
+            if type(data.active) == "string" and configData.configs[data.active] then
+                configData.active = data.active
+            end
+            if type(data.menuBind) == "string" then configData.menuBind = data.menuBind end
+        elseif data.toggles or data.sliders then
+            configData.configs.default = { toggles = data.toggles or {}, sliders = data.sliders or {} }
+            configData.active = "default"
+            if type(data.menuBind) == "string" then configData.menuBind = data.menuBind end
+        end
     end
 end
-local menuBind = Enum.KeyCode[config.menuBind] or Enum.KeyCode.RightShift
+if not configData.configs[configData.active] then
+    configData.active = next(configData.configs) or "default"
+    if not configData.configs[configData.active] then
+        configData.configs[configData.active] = { toggles = {}, sliders = {} }
+    end
+end
+if not configData.configs[configData.active].toggles then
+    configData.configs[configData.active].toggles = {}
+end
+if not configData.configs[configData.active].sliders then
+    configData.configs[configData.active].sliders = {}
+end
+
+-- config — ссылки на таблицы активного конфига
+local config = {
+    toggles = configData.configs[configData.active].toggles,
+    sliders = configData.configs[configData.active].sliders,
+}
+
+local menuBind = Enum.KeyCode[configData.menuBind] or Enum.KeyCode.RightShift
 
 -- ============================================================
---  GUI
+--  GUI CORE
 -- ============================================================
 local gui = Instance.new("ScreenGui")
 gui.Name = "MurderCheats"
@@ -263,13 +269,13 @@ gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 gui.Parent = pg
 
 local watermark = Instance.new("TextLabel")
-watermark.Size = UDim2.new(0, 180, 0, 22)
+watermark.Size = UDim2.new(0, 200, 0, 22)
 watermark.Position = UDim2.new(0, 12, 0, 12)
 watermark.BackgroundTransparency = 1
 watermark.Font = Enum.Font.GothamBold
 watermark.TextSize = 12
 watermark.RichText = true
-watermark.Text = '<font color="#00FF96">●</font> MURDER CHEATS  <font color="#FFA03C">v10</font>'
+watermark.Text = '<font color="#00FF96">●</font> MURDER CHEATS  <font color="#FFA03C">v11</font>'
 watermark.TextXAlignment = Enum.TextXAlignment.Left
 watermark.Parent = gui
 
@@ -294,7 +300,6 @@ fStroke.Color = C_ACCENT
 fStroke.Thickness = 1.5
 fStroke.Transparency = 0.35
 
--- Пульсирующая обводка
 task.spawn(function()
     local phase = 0
     while gui.Parent do
@@ -449,7 +454,7 @@ local function switchTab(name)
     end
     activeTab = name
 end
-for _, n in ipairs({"Combat", "Visuals", "Movement", "Utility", "Settings"}) do
+for _, n in ipairs({"Combat", "Visuals", "Movement", "Utility", "Config", "Settings"}) do
     createTab(n)
     tabs[n].btn.MouseButton1Click:Connect(function() switchTab(n) end)
 end
@@ -707,7 +712,7 @@ local function createSlider(parent, name, min, max, default, onChange)
     end)
     setValue(default, false, false)
     addReset(function() setValue(default, true, true) end)
-    sliderRegistry[name] = { setValue = setValue, getValue = function() return currentVal end }
+    sliderRegistry[name] = { setValue = setValue, getValue = function() return currentVal end, default = default }
 end
 
 local function getHum()
@@ -720,8 +725,9 @@ local function getTeamColor(p)
 end
 
 -- ============================================================
---  FLY / INF JUMP / NOCLIP / SPRINT
+--  FEATURE LOGIC (сокращено до значимых частей — как в предыдущих версиях)
 -- ============================================================
+-- FLY
 local flyKeys = {W=false, A=false, S=false, D=false, Space=false, LCtrl=false}
 local flyActive, flyBV, flyBG = false, nil, nil
 local flySpeed = 50
@@ -772,7 +778,6 @@ local infJumpOn = false
 UIS.JumpRequest:Connect(function()
     if infJumpOn then local h = getHum(); if h then h:ChangeState(Enum.HumanoidStateType.Jumping) end end
 end)
-
 local noclipOn = false
 RunService.Stepped:Connect(function()
     if not noclipOn then return end
@@ -782,7 +787,6 @@ RunService.Stepped:Connect(function()
         if p:IsA("BasePart") then p.CanCollide = false end
     end
 end)
-
 local sprintOn, sprintHeld, sprintSpeed = false, false, 40
 UIS.InputBegan:Connect(function(input, gp)
     if gp then return end
@@ -794,17 +798,14 @@ end)
 RunService.Heartbeat:Connect(function()
     local h = getHum()
     if not h then return end
-    if sprintOn and sprintHeld then
-        h.WalkSpeed = sprintSpeed
+    if sprintOn and sprintHeld then h.WalkSpeed = sprintSpeed
     elseif sprintOn and not sprintHeld then
         local base = sliderRegistry["Speed"] and sliderRegistry["Speed"].getValue() or 16
         h.WalkSpeed = base
     end
 end)
 
--- ============================================================
---  FULLBRIGHT / POSTFX / ATMOSPHERE
--- ============================================================
+-- FULLBRIGHT / POSTFX
 local origB, origA, origO
 local function setFullbright(on)
     if on then
@@ -822,9 +823,7 @@ local postDisabled = {}
 local function setNoPost(on)
     if on then
         for _, e in ipairs(Lighting:GetChildren()) do
-            if e:IsA("PostEffect") and e.Enabled then
-                postDisabled[e] = true; e.Enabled = false
-            end
+            if e:IsA("PostEffect") and e.Enabled then postDisabled[e] = true; e.Enabled = false end
         end
     else
         for e in pairs(postDisabled) do if e.Parent then e.Enabled = true end end
@@ -832,24 +831,7 @@ local function setNoPost(on)
     end
 end
 
-local atmosIdx = 1
-local atmosPresets = {
-    { name = "Default", ambient = Color3.fromRGB(70,70,70),   out = Color3.fromRGB(128,128,128), bright = 2,   clock = 14 },
-    { name = "Night",   ambient = Color3.fromRGB(15,20,40),   out = Color3.fromRGB(20,25,50),    bright = 0.3, clock = 0 },
-    { name = "Dusk",    ambient = Color3.fromRGB(90,60,80),   out = Color3.fromRGB(120,80,100),  bright = 1,   clock = 18 },
-    { name = "Red",     ambient = Color3.fromRGB(120,20,20),  out = Color3.fromRGB(160,40,40),   bright = 1,   clock = 14 },
-}
-local function applyAtmos()
-    local p = atmosPresets[atmosIdx]
-    Lighting.Ambient = p.ambient
-    Lighting.OutdoorAmbient = p.out
-    Lighting.Brightness = p.bright
-    Lighting.ClockTime = p.clock
-end
-
--- ============================================================
---  ESP
--- ============================================================
+-- ESP
 local espOn, espTeamChk, espNames, espHP, espDist = false, false, false, false, false
 local rainbowEsp = false
 local espH, espBB = {}, {}
@@ -965,14 +947,11 @@ task.spawn(function()
     end
 end)
 
--- ============================================================
---  TRACERS / SKELETON
--- ============================================================
+-- TRACERS / SKELETON
 local tracerOn = false
 local skeletonOn = false
 local tracerLines, skelLines = {}, {}
 local hasDrawing = pcall(function() local l = drawing.new("Line"); l:Remove() end)
-
 RunService.RenderStepped:Connect(function()
     if not hasDrawing then return end
     cam = workspace.CurrentCamera
@@ -1019,22 +998,19 @@ RunService.RenderStepped:Connect(function()
                 local lines = skelLines[p]
                 local col = getTeamColor(p)
                 local bones = {
-                    {"Head", "UpperTorso"}, {"UpperTorso", "LowerTorso"},
-                    {"UpperTorso", "LeftUpperArm"}, {"LeftUpperArm", "LeftLowerArm"},
-                    {"LeftLowerArm", "LeftHand"},
-                    {"UpperTorso", "RightUpperArm"}, {"RightUpperArm", "RightLowerArm"},
-                    {"RightLowerArm", "RightHand"},
-                    {"LowerTorso", "LeftUpperLeg"}, {"LeftUpperLeg", "LeftLowerLeg"},
-                    {"LeftLowerLeg", "LeftFoot"},
-                    {"LowerTorso", "RightUpperLeg"}, {"RightUpperLeg", "RightLowerLeg"},
-                    {"RightLowerLeg", "RightFoot"},
+                    {"Head","UpperTorso"},{"UpperTorso","LowerTorso"},
+                    {"UpperTorso","LeftUpperArm"},{"LeftUpperArm","LeftLowerArm"},
+                    {"LeftLowerArm","LeftHand"},
+                    {"UpperTorso","RightUpperArm"},{"RightUpperArm","RightLowerArm"},
+                    {"RightLowerArm","RightHand"},
+                    {"LowerTorso","LeftUpperLeg"},{"LeftUpperLeg","LeftLowerLeg"},
+                    {"LeftLowerLeg","LeftFoot"},
+                    {"LowerTorso","RightUpperLeg"},{"RightUpperLeg","RightLowerLeg"},
+                    {"RightLowerLeg","RightFoot"},
                 }
                 if char:FindFirstChild("Torso") then
-                    bones = {
-                        {"Head", "Torso"},
-                        {"Torso", "Left Arm"}, {"Torso", "Right Arm"},
-                        {"Torso", "Left Leg"}, {"Torso", "Right Leg"},
-                    }
+                    bones = {{"Head","Torso"},{"Torso","Left Arm"},{"Torso","Right Arm"},
+                             {"Torso","Left Leg"},{"Torso","Right Leg"}}
                 end
                 for i, pair in ipairs(bones) do
                     local a = char:FindFirstChild(pair[1])
@@ -1050,9 +1026,7 @@ RunService.RenderStepped:Connect(function()
                         else
                             lines[i].Visible = false
                         end
-                    elseif lines[i] then
-                        lines[i].Visible = false
-                    end
+                    elseif lines[i] then lines[i].Visible = false end
                 end
             end
         end
@@ -1069,9 +1043,7 @@ local function clearSkeleton()
     skelLines = {}
 end
 
--- ============================================================
---  CHAMS / OUTLINE / NAMETAG / HAT / CROSSHAIR
--- ============================================================
+-- CHAMS / OUTLINE / NAMETAG / HAT / CROSSHAIR
 local chamsOn = false
 local chamsColor = Color3.fromRGB(0, 255, 150)
 RunService.Heartbeat:Connect(function()
@@ -1082,7 +1054,6 @@ RunService.Heartbeat:Connect(function()
         if p:IsA("BasePart") and p.Name ~= "HumanoidRootPart" then p.Color = chamsColor end
     end
 end)
-
 local selfHighlight
 local function setSelfOutline(on)
     if on then
@@ -1097,7 +1068,6 @@ local function setSelfOutline(on)
         if selfHighlight then selfHighlight:Destroy(); selfHighlight = nil end
     end
 end
-
 local nametagGui
 local function setNametag(on)
     if on and player.Character then
@@ -1124,7 +1094,6 @@ local function setNametag(on)
         if nametagGui then nametagGui:Destroy(); nametagGui = nil end
     end
 end
-
 local chinaHatPart
 local function setChinaHat(on)
     if on then
@@ -1139,7 +1108,6 @@ local function setChinaHat(on)
         chinaHatPart.Material = Enum.Material.Neon
         chinaHatPart.CanCollide = false
         chinaHatPart.Massless = true
-        chinaHatPart.Name = "MurderCheats_Hat"
         chinaHatPart.Parent = char
         local weld = Instance.new("Weld")
         weld.Part0 = head
@@ -1150,13 +1118,11 @@ local function setChinaHat(on)
         if chinaHatPart then chinaHatPart:Destroy(); chinaHatPart = nil end
     end
 end
-
 local crosshairGui
 local function setCrosshair(on)
     if on then
         if crosshairGui then crosshairGui:Destroy() end
         crosshairGui = Instance.new("ScreenGui")
-        crosshairGui.Name = "MCCrosshair"
         crosshairGui.IgnoreGuiInset = true
         crosshairGui.ResetOnSpawn = false
         crosshairGui.Parent = pg
@@ -1169,31 +1135,40 @@ local function setCrosshair(on)
             f.Parent = crosshairGui
             Instance.new("UICorner", f).CornerRadius = UDim.new(1, 0)
         end
-        mkLine(2, 14, -1, -16)
-        mkLine(2, 14, -1, 2)
-        mkLine(14, 2, -16, -1)
-        mkLine(14, 2, 2, -1)
+        mkLine(2, 14, -1, -16); mkLine(2, 14, -1, 2)
+        mkLine(14, 2, -16, -1); mkLine(14, 2, 2, -1)
     else
         if crosshairGui then crosshairGui:Destroy(); crosshairGui = nil end
     end
 end
 
--- ============================================================
---  HITBOX
--- ============================================================
+-- ATMOSPHERE
+local atmosIdx = 1
+local atmosPresets = {
+    { name = "Default", ambient = Color3.fromRGB(70,70,70),   out = Color3.fromRGB(128,128,128), bright = 2,   clock = 14 },
+    { name = "Night",   ambient = Color3.fromRGB(15,20,40),   out = Color3.fromRGB(20,25,50),    bright = 0.3, clock = 0 },
+    { name = "Dusk",    ambient = Color3.fromRGB(90,60,80),   out = Color3.fromRGB(120,80,100),  bright = 1,   clock = 18 },
+    { name = "Red",     ambient = Color3.fromRGB(120,20,20),  out = Color3.fromRGB(160,40,40),   bright = 1,   clock = 14 },
+}
+local function applyAtmos()
+    local p = atmosPresets[atmosIdx]
+    Lighting.Ambient = p.ambient
+    Lighting.OutdoorAmbient = p.out
+    Lighting.Brightness = p.bright
+    Lighting.ClockTime = p.clock
+end
+
+-- HITBOX
 local hitboxOn = false
 local hitboxScale = 1.6
 local hitboxTransparency = 0.5
-
 local function applyHitbox()
     if not hitboxOn then return end
     for _, p in ipairs(Players:GetPlayers()) do
         if p ~= player and p.Character then
             for _, part in ipairs(p.Character:GetDescendants()) do
-                if part:IsA("BasePart") and (part.Name == "Head"
-                    or part.Name == "HumanoidRootPart"
-                    or part.Name == "UpperTorso"
-                    or part.Name == "Torso") then
+                if part:IsA("BasePart") and (part.Name == "Head" or part.Name == "HumanoidRootPart"
+                    or part.Name == "UpperTorso" or part.Name == "Torso") then
                     if not part:GetAttribute("origSize") then
                         part:SetAttribute("origSize", part.Size)
                         part:SetAttribute("origTransparency", part.Transparency)
@@ -1225,9 +1200,7 @@ local function restoreHitbox()
 end
 RunService.Heartbeat:Connect(applyHitbox)
 
--- ============================================================
---  AIM (mouse-based + wallcheck)
--- ============================================================
+-- AIMBOT
 local aimOn, aimAutoShoot, aimKeyHeld, aimWallcheck, aimSnap = false, false, false, false, false
 local aimHold = Enum.UserInputType.MouseButton2
 local aimFOV, aimSmooth = 150, 0.35
@@ -1241,9 +1214,7 @@ local triggerOn, triggerFOV = false, 30
 
 local topInset = 36
 pcall(function() topInset = GuiService:GetGuiInset().Y end)
-local function getMouseViewport()
-    return UIS:GetMouseLocation() - Vector2.new(0, topInset)
-end
+local function getMouseViewport() return UIS:GetMouseLocation() - Vector2.new(0, topInset) end
 
 local fovCircle = Instance.new("Frame")
 fovCircle.Size = UDim2.new(0, aimFOV*2, 0, aimFOV*2)
@@ -1339,9 +1310,7 @@ task.spawn(function()
     end
 end)
 
--- ============================================================
---  FREECAM / CLICK TP / RESPAWN / SPIN / BODY
--- ============================================================
+-- FREECAM / CLICK TP / RESPAWN / SPIN / BODY
 local freecamOn = false
 local freecamPos, freecamLook
 local origCameraSubject
@@ -1417,15 +1386,11 @@ end)
 local function applyBodyScale(s)
     local h = getHum()
     if not h then return end
-    h.BodyDepthScale.Value  = s
-    h.BodyWidthScale.Value  = s
-    h.BodyHeightScale.Value = s
-    h.HeadScale.Value       = s
+    h.BodyDepthScale.Value = s; h.BodyWidthScale.Value = s
+    h.BodyHeightScale.Value = s; h.HeadScale.Value = s
 end
 
--- ============================================================
---  SAVE/LOAD POS / BHOP / LONG JUMP / WALL CLIMB / SPEED
--- ============================================================
+-- SAVE/LOAD POS / BHOP / LONG JUMP / WALL CLIMB / SPEED
 local savedPosition = nil
 local bhopOn = false
 RunService.Heartbeat:Connect(function()
@@ -1499,9 +1464,7 @@ local function spectateNext()
     cam.CameraSubject = t.Character:FindFirstChildOfClass("Humanoid") or t.Character:FindFirstChild("HumanoidRootPart")
 end
 
--- ============================================================
---  PLAYER LIST
--- ============================================================
+-- PLAYER LIST
 local playerListGui = Instance.new("ScreenGui")
 playerListGui.Name = "MCPlayerList"
 playerListGui.ResetOnSpawn = false
@@ -1539,7 +1502,6 @@ plScroll.Parent = playerListFrame
 local plLayout = Instance.new("UIListLayout")
 plLayout.Padding = UDim.new(0, 3)
 plLayout.Parent = plScroll
-
 task.spawn(function()
     while gui.Parent do
         task.wait(1)
@@ -1560,11 +1522,7 @@ task.spawn(function()
                 else
                     lbl.TextColor3 = C_TEXT
                     local hum = p.Character and p.Character:FindFirstChildOfClass("Humanoid")
-                    if hum then
-                        lbl.Text = string.format("  %s  [%d]", p.Name, math.floor(hum.Health))
-                    else
-                        lbl.Text = "  " .. p.Name
-                    end
+                    lbl.Text = hum and string.format("  %s  [%d]", p.Name, math.floor(hum.Health)) or ("  " .. p.Name)
                 end
                 lbl.Parent = plScroll
             end
@@ -1572,9 +1530,7 @@ task.spawn(function()
     end
 end)
 
--- ============================================================
---  UNLOAD
--- ============================================================
+-- UNLOAD
 local function unloadCheat()
     pcall(resetAll)
     pcall(function() setFly(false) end)
@@ -1616,7 +1572,6 @@ local function showUnloadConfirm()
     modal.BorderSizePixel = 0
     modal.ZIndex = 100
     modal.Parent = gui
-
     local dialog = Instance.new("Frame")
     dialog.Size = UDim2.new(0, 340, 0, 170)
     dialog.Position = UDim2.new(0.5, -170, 0.5, -85)
@@ -1627,7 +1582,6 @@ local function showUnloadConfirm()
     Instance.new("UICorner", dialog).CornerRadius = UDim.new(0, 10)
     local dS = Instance.new("UIStroke", dialog)
     dS.Color = C_DANGER; dS.Thickness = 2
-
     local lbl = Instance.new("TextLabel")
     lbl.Size = UDim2.new(1, -32, 0, 90)
     lbl.Position = UDim2.new(0, 16, 0, 16)
@@ -1640,12 +1594,10 @@ local function showUnloadConfirm()
     lbl.Text = 'Точно ли вырубить чит?\n<font size="12" color="#6E8291">Все функции будут отключены.\nВернуть — только перезапуском скрипта.</font>'
     lbl.ZIndex = 102
     lbl.Parent = dialog
-
     local yesBtn = Instance.new("TextButton")
     yesBtn.Size = UDim2.new(0, 140, 0, 36)
     yesBtn.Position = UDim2.new(0, 16, 1, -52)
     yesBtn.BackgroundColor3 = C_DANGER
-    yesBtn.BorderSizePixel = 0
     yesBtn.AutoButtonColor = false
     yesBtn.Font = Enum.Font.GothamBold
     yesBtn.TextSize = 13
@@ -1654,12 +1606,10 @@ local function showUnloadConfirm()
     yesBtn.ZIndex = 102
     yesBtn.Parent = dialog
     Instance.new("UICorner", yesBtn).CornerRadius = UDim.new(0, 6)
-
     local noBtn = Instance.new("TextButton")
     noBtn.Size = UDim2.new(0, 140, 0, 36)
     noBtn.Position = UDim2.new(1, -156, 1, -52)
     noBtn.BackgroundColor3 = C_ACCENT
-    noBtn.BorderSizePixel = 0
     noBtn.AutoButtonColor = false
     noBtn.Font = Enum.Font.GothamBold
     noBtn.TextSize = 13
@@ -1668,7 +1618,6 @@ local function showUnloadConfirm()
     noBtn.ZIndex = 102
     noBtn.Parent = dialog
     Instance.new("UICorner", noBtn).CornerRadius = UDim.new(0, 6)
-
     noBtn.MouseButton1Click:Connect(function() modal:Destroy() end)
     yesBtn.MouseButton1Click:Connect(function() modal:Destroy(); task.wait(0.05); unloadCheat() end)
 end
@@ -1689,8 +1638,7 @@ createSlider(cScroll, "Aim Smoothness", 0, 0.95, 0.35, function(v) aimSmooth = v
 createSlider(cScroll, "Prediction (сек)", 0, 0.5, 0, function(v) aimPrediction = v end)
 createToggle(cScroll, "Auto Shoot", function() aimAutoShoot = true end, function() aimAutoShoot = false end)
 createToggle(cScroll, "Wallcheck (не наводится через стены)",
-    function() aimWallcheck = true end,
-    function() aimWallcheck = false end)
+    function() aimWallcheck = true end, function() aimWallcheck = false end)
 createToggle(cScroll, "Snap Aim (клик -> мгновенно в цель)",
     function() aimSnap = true end, function() aimSnap = false end)
 do
@@ -1740,11 +1688,11 @@ createToggle(vScroll, "Health bars", function() espHP = true; clearESP() end, fu
 createToggle(vScroll, "Distance labels", function() espDist = true; clearESP() end, function() espDist = false; clearESP() end)
 createToggle(vScroll, "Rainbow ESP", function() rainbowEsp = true end, function() rainbowEsp = false end)
 createToggle(vScroll, "Tracers", function()
-    if not hasDrawing then warn("[Murder Cheats] Drawing API недоступен"); return end
+    if not hasDrawing then warn("[MC] Drawing API недоступен"); return end
     tracerOn = true
 end, function() tracerOn = false; clearTracers() end)
 createToggle(vScroll, "Skeleton ESP", function()
-    if not hasDrawing then warn("[Murder Cheats] Drawing API недоступен"); return end
+    if not hasDrawing then warn("[MC] Drawing API недоступен"); return end
     skeletonOn = true
 end, function() skeletonOn = false; clearSkeleton() end)
 
@@ -1837,226 +1785,4 @@ createButton(uScroll, "Copy Position", function()
     local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
     if hrp then
         local p = hrp.Position
-        local s = string.format("Vector3.new(%d, %d, %d)", p.X, p.Y, p.Z)
-        if setclipboard then pcall(setclipboard, s) end
-        print("[MC] copied:", s)
-    end
-end)
-
-section(uScroll, "Teleport")
-createButton(uScroll, "TP to Random Player", function()
-    local others = {}
-    for _, p in ipairs(Players:GetPlayers()) do
-        if p ~= player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-            table.insert(others, p)
-        end
-    end
-    if #others == 0 then return end
-    local t = others[math.random(#others)]
-    local myHrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-    local tHrp  = t.Character and t.Character:FindFirstChild("HumanoidRootPart")
-    if myHrp and tHrp then myHrp.CFrame = tHrp.CFrame * CFrame.new(0, 0, 3) end
-end)
-createButton(uScroll, "Teleport to Spawn", function()
-    local char = player.Character
-    local hrp = char and char:FindFirstChild("HumanoidRootPart")
-    if not hrp then return end
-    for _, obj in ipairs(workspace:GetDescendants()) do
-        if obj:IsA("SpawnLocation") then
-            hrp.CFrame = obj.CFrame + Vector3.new(0, 5, 0)
-            break
-        end
-    end
-end)
-createButton(uScroll, "Teleport Up +50", function()
-    local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-    if hrp then hrp.CFrame = hrp.CFrame + Vector3.new(0, 50, 0) end
-end)
-createButton(uScroll, "Spectate Next", function() spectateNext() end)
-createButton(uScroll, "Reset Character", function()
-    local h = getHum(); if h then h.Health = 0 end
-end)
-
-section(uScroll, "Automation")
-createToggle(uScroll, "Anti-AFK", function() antiafkOn = true end, function() antiafkOn = false end)
-
-section(uScroll, "Server")
-createButton(uScroll, "Rejoin Server", function()
-    pcall(function() Teleport:Teleport(game.PlaceId) end)
-end, C_DANGER)
-
-local sInfo = Instance.new("TextLabel")
-sInfo.Size = UDim2.new(1, 0, 0, 48)
-sInfo.BackgroundTransparency = 1
-sInfo.Font = Enum.Font.Code
-sInfo.TextSize = 11
-sInfo.TextColor3 = C_SUB
-sInfo.TextXAlignment = Enum.TextXAlignment.Left
-sInfo.TextYAlignment = Enum.TextYAlignment.Top
-sInfo.Text = "  loading..."
-sInfo.Parent = uScroll
-task.spawn(function()
-    while gui.Parent do
-        task.wait(1)
-        local ping = "?"
-        pcall(function()
-            ping = tostring(math.floor(Stats.Network.ServerStatsItem["Data Ping"]:GetValue())) .. " ms"
-        end)
-        sInfo.Text = string.format("  Place ID: %d\n  Players: %d\n  Ping: %s",
-            game.PlaceId, #Players:GetPlayers(), ping)
-    end
-end)
-
--- ============================================================
---  SETTINGS TAB
--- ============================================================
-local sScroll = tabs["Settings"].scroll
-section(sScroll, "Menu Bind")
-local listeningBind = false
-local bindBtn = createButton(sScroll, "Change Bind: " .. menuBind.Name, function() end, C_ACCENT)
-bindBtn.MouseButton1Click:Connect(function()
-    listeningBind = true
-    bindBtn.Text = "  ▸ Press any key..."
-end)
-
-section(sScroll, "Interface")
-createSlider(sScroll, "Menu Scale", 0.6, 1.4, 1, function(v) uiScale.Scale = v end)
-createToggle(sScroll, "Show Watermark",
-    function() watermark.Visible = true end,
-    function() watermark.Visible = false end)
-
-section(sScroll, "Configuration")
-createButton(sScroll, "Reset All Settings", function() resetAll() end, C_DANGER)
-
-section(sScroll, "Danger Zone")
-local unloadBtn = Instance.new("TextButton")
-unloadBtn.Size = UDim2.new(1, 0, 0, 24)
-unloadBtn.BackgroundColor3 = Color3.fromRGB(40, 10, 15)
-unloadBtn.BorderSizePixel = 0
-unloadBtn.AutoButtonColor = false
-unloadBtn.Font = Enum.Font.GothamBold
-unloadBtn.TextSize = 11
-unloadBtn.TextColor3 = C_DANGER
-unloadBtn.Text = "  ✕  UNLOAD CHEAT"
-unloadBtn.TextXAlignment = Enum.TextXAlignment.Left
-unloadBtn.Parent = sScroll
-Instance.new("UICorner", unloadBtn).CornerRadius = UDim.new(0, 5)
-local ubStroke = Instance.new("UIStroke", unloadBtn)
-ubStroke.Color = C_DANGER; ubStroke.Thickness = 1; ubStroke.Transparency = 0.5
-unloadBtn.MouseEnter:Connect(function()
-    TweenService:Create(unloadBtn, TweenInfo.new(0.12), {BackgroundColor3 = Color3.fromRGB(70, 15, 25)}):Play()
-    TweenService:Create(ubStroke, TweenInfo.new(0.12), {Transparency = 0}):Play()
-end)
-unloadBtn.MouseLeave:Connect(function()
-    TweenService:Create(unloadBtn, TweenInfo.new(0.12), {BackgroundColor3 = Color3.fromRGB(40, 10, 15)}):Play()
-    TweenService:Create(ubStroke, TweenInfo.new(0.12), {Transparency = 0.5}):Play()
-end)
-unloadBtn.MouseButton1Click:Connect(showUnloadConfirm)
-
-local coord = Instance.new("TextLabel")
-coord.Size = UDim2.new(1, 0, 0, 20)
-coord.BackgroundTransparency = 1
-coord.Font = Enum.Font.Code
-coord.TextSize = 11
-coord.TextColor3 = C_ACCENT
-coord.TextXAlignment = Enum.TextXAlignment.Left
-coord.Text = "  Pos: -, -, -    FPS: 0"
-coord.Parent = sScroll
-
-local fps, frames, last = 0, 0, tick()
-RunService.RenderStepped:Connect(function()
-    frames = frames + 1
-    if tick() - last >= 1 then fps = frames; frames = 0; last = tick() end
-    local char = player.Character
-    local hrp = char and char:FindFirstChild("HumanoidRootPart")
-    if hrp then
-        local p = hrp.Position
-        coord.Text = string.format("  Pos: %.0f, %.0f, %.0f    FPS: %d", p.X, p.Y, p.Z, fps)
-    else
-        coord.Text = string.format("  Pos: -, -, -    FPS: %d", fps)
-    end
-end)
-
--- ============================================================
---  ЗАГРУЗКА СОХРАНЁННОГО
--- ============================================================
-for name, val in pairs(config.toggles) do
-    if toggleRegistry[name] and val then toggleRegistry[name].setState(true, false) end
-end
-for name, val in pairs(config.sliders) do
-    if sliderRegistry[name] then sliderRegistry[name].setValue(val, true, false) end
-end
-
--- ============================================================
---  OPEN / CLOSE
--- ============================================================
-local function openMenu()
-    frame.Visible = true
-    local base = sliderRegistry["Menu Scale"] and sliderRegistry["Menu Scale"].getValue() or 1
-    uiScale.Scale = base * 0.85
-    TweenService:Create(uiScale,
-        TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Scale = base}):Play()
-    TweenService:Create(fStroke, TweenInfo.new(0.2), {Thickness = 3}):Play()
-    task.delay(0.25, function()
-        TweenService:Create(fStroke, TweenInfo.new(0.3), {Thickness = 1.5}):Play()
-    end)
-end
-local function closeMenu()
-    local base = sliderRegistry["Menu Scale"] and sliderRegistry["Menu Scale"].getValue() or 1
-    local t = TweenService:Create(uiScale,
-        TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Scale = base * 0.85})
-    t:Play()
-    t.Completed:Connect(function() frame.Visible = false; uiScale.Scale = base end)
-end
-closeBtn.MouseButton1Click:Connect(closeMenu)
-switchTab("Combat")
-
-UIS.InputBegan:Connect(function(input, gp)
-    if listeningBind then
-        if input.UserInputType == Enum.UserInputType.Keyboard then
-            listeningBind = false
-            menuBind = input.KeyCode
-            config.menuBind = input.KeyCode.Name
-            saveConfig()
-            bindBtn.Text = "  ▸ Change Bind: " .. menuBind.Name
-        end
-        return
-    end
-    if input.KeyCode == menuBind and not gp then
-        if frame.Visible then closeMenu() else openMenu() end
-        return
-    end
-    if gp then return end
-    local k = input.KeyCode
-    if     k == Enum.KeyCode.W           then flyKeys.W = true
-    elseif k == Enum.KeyCode.A           then flyKeys.A = true
-    elseif k == Enum.KeyCode.S           then flyKeys.S = true
-    elseif k == Enum.KeyCode.D           then flyKeys.D = true
-    elseif k == Enum.KeyCode.Space       then flyKeys.Space = true
-    elseif k == Enum.KeyCode.LeftControl then flyKeys.LCtrl = true
-    end
-    if input.UserInputType == aimHold then aimKeyHeld = true end
-end)
-UIS.InputEnded:Connect(function(input)
-    local k = input.KeyCode
-    if     k == Enum.KeyCode.W           then flyKeys.W = false
-    elseif k == Enum.KeyCode.A           then flyKeys.A = false
-    elseif k == Enum.KeyCode.S           then flyKeys.S = false
-    elseif k == Enum.KeyCode.D           then flyKeys.D = false
-    elseif k == Enum.KeyCode.Space       then flyKeys.Space = false
-    elseif k == Enum.KeyCode.LeftControl then flyKeys.LCtrl = false
-    end
-    if input.UserInputType == aimHold then aimKeyHeld = false end
-end)
-
-player.CharacterAdded:Connect(function()
-    task.wait(0.4)
-    for name, t in pairs(toggleRegistry) do
-        if t.getState() then pcall(t.setState, true, false) end
-    end
-    for name, s in pairs(sliderRegistry) do
-        pcall(s.setValue, s.getValue(), true, false)
-    end
-    if toggleRegistry["Self nametag"] and toggleRegistry["Self nametag"].getState() then setNametag(true) end
-    if toggleRegistry["China Hat"] and toggleRegistry["China Hat"].getState() then setChinaHat(true) end
-end)
+        local s = string.format("Vector3.new(%d, %d, %d
