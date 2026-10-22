@@ -1,6 +1,4 @@
--- ============================================================
---  MURDER CHEATS v25 | Ultimate Build (Fixed Sprint + New Funcs)
--- ============================================================
+
 local UIS, RS, Plr, Lgt = game:GetService("UserInputService"), game:GetService("RunService"), game:GetService("Players"), game:GetService("Lighting")
 local VU, Http, Tp, Gui = game:GetService("VirtualUser"), game:GetService("HttpService"), game:GetService("TeleportService"), game:GetService("GuiService")
 local Twn = game:GetService("TweenService")
@@ -12,7 +10,6 @@ local C_ACC, C_TXT, C_SUB, C_DNG = Color3.fromRGB(88, 101, 242), Color3.fromRGB(
 if pg:FindFirstChild("MC_Pwd") then pg.MC_Pwd:Destroy() end
 if pg:FindFirstChild("MurderCheats") then pg.MurderCheats:Destroy() end
 
--- ПАРОЛЬ
 local pG = Instance.new("ScreenGui", pg); pG.Name="MC_Pwd"; pG.IgnoreGuiInset=true; pG.DisplayOrder=999
 local pB = Instance.new("Frame", pG); pB.Size=UDim2.fromScale(1,1); pB.BackgroundColor3=Color3.new(0,0,0); pB.BackgroundTransparency=0.4
 local pC = Instance.new("Frame", pB); pC.Size=UDim2.new(0,360,0,260); pC.Position=UDim2.new(0.5,-180,0.5,-130); pC.BackgroundColor3=C_BG
@@ -27,16 +24,50 @@ local function unlock() if pI.Text == "murder" then pOk = true; pG:Destroy() els
 pBtn.MouseButton1Click:Connect(unlock); pI.FocusLost:Connect(unlock)
 repeat task.wait(0.1) until pOk
 
-local CF = "MC_v25.json"; local cfg = { c={default={t={},s={}}}, a="default", b="RightShift" }; local c = { t=cfg.c.default.t, s=cfg.c.default.s }
+-- КОНФИГИ
+local CF = "MC_v27.json"; local cfg = { c={default={t={},s={}}}, a="default", b="RightShift" }; local c = { t=cfg.c.default.t, s=cfg.c.default.s }
 local function save() cfg.c[cfg.a]={t=c.t,s=c.s}; if writefile then pcall(function() writefile(CF, Http:JSONEncode(cfg)) end) end end
 if isfile and readfile and isfile(CF) then local ok, d = pcall(function() return Http:JSONDecode(readfile(CF)) end); if ok and d.c then cfg=d; if cfg.c[cfg.a] then c.t=cfg.c[cfg.a].t; c.s=cfg.c[cfg.a].s end end end
 local bind = Enum.KeyCode[cfg.b] or Enum.KeyCode.RightShift
 
+-- GUI
 local gui = Instance.new("ScreenGui", pg); gui.Name="MurderCheats"; gui.ResetOnSpawn=false
 local frm = Instance.new("Frame", gui); frm.Size=UDim2.new(0,600,0,420); frm.Position=UDim2.new(0.5,-300,0.5,-210); frm.BackgroundColor3=C_BG; frm.Visible=false; frm.ClipsDescendants=true
 Instance.new("UICorner", frm).CornerRadius=UDim.new(0,12); Instance.new("UIStroke", frm).Color=C_ACC
 local uisc = Instance.new("UIScale", frm); uisc.Scale = 0.9
 
+-- 💧 ВАТЕРМАРК (FPS + ВРЕМЯ)
+local wmFrame = Instance.new("Frame", gui)
+wmFrame.Size = UDim2.new(0, 160, 0, 26)
+wmFrame.Position = UDim2.new(0.5, -80, 1, -36)
+wmFrame.BackgroundColor3 = C_BG
+wmFrame.BackgroundTransparency = 0.2
+wmFrame.BorderSizePixel = 0
+Instance.new("UICorner", wmFrame).CornerRadius = UDim.new(0, 6)
+local wmStroke = Instance.new("UIStroke", wmFrame)
+wmStroke.Color = C_ACC
+wmStroke.Thickness = 1
+local wmText = Instance.new("TextLabel", wmFrame)
+wmText.Size = UDim2.fromScale(1, 1)
+wmText.BackgroundTransparency = 1
+wmText.Font = Enum.Font.GothamBold
+wmText.TextSize = 12
+wmText.TextColor3 = C_TXT
+wmText.Text = "FPS: -- | --:--:--"
+
+local fpsCount, fpsTimer = 0, tick()
+RS.RenderStepped:Connect(function()
+    fpsCount = fpsCount + 1
+    if tick() - fpsTimer >= 1 then
+        local fps = math.floor(fpsCount / (tick() - fpsTimer))
+        fpsCount = 0
+        fpsTimer = tick()
+        local time = os.date("%H:%M:%S")
+        wmText.Text = string.format("FPS: %d | %s", fps, time)
+    end
+end)
+
+-- ОСТАЛЬНОЙ UI
 local sb = Instance.new("Frame", frm); sb.Size=UDim2.new(0,140,1,-20); sb.Position=UDim2.new(0,10,0,10); sb.BackgroundColor3=C_PNL
 Instance.new("UICorner", sb).CornerRadius=UDim.new(0,10)
 local brd = Instance.new("TextLabel", sb); brd.Size=UDim2.new(1,-16,0,40); brd.Position=UDim2.new(0,10,0,10); brd.BackgroundTransparency=1; brd.Font=Enum.Font.GothamBold; brd.TextSize=16; brd.TextColor3=C_TXT; brd.Text="MURDER\nCHEATS"; brd.TextXAlignment=Enum.TextXAlignment.Left
@@ -91,58 +122,27 @@ end
 local function getHum() local ch=player.Character; return ch and ch:FindFirstChildOfClass("Humanoid") end
 local function getTeam(p) return p.Team and p.Team.TeamColor.Color or C_ACC end
 
--- НОВЫЕ ФУНКЦИИ И ФИКС СПРИНТА
+-- ЛОГИКА (Фикс спринта)
 local fK = {W=false, A=false, S=false, D=false, Space=false, Ctrl=false}
 local sprintOn, sprintSpd, baseSpeed = false, 60, 16
 local flyAct, bv, bg, fSpd = false, nil, nil, 50
 local function setFly(on) if bv then bv:Destroy() end; if bg then bg:Destroy() end; local ch, hu = player.Character, getHum(); if hu then hu.PlatformStand=false end; flyAct=false; if on and ch and hu then local hrp=ch:FindFirstChild("HumanoidRootPart"); if hrp then bv=Instance.new("BodyVelocity",hrp); bv.MaxForce=Vector3.new(9e9,9e9,9e9); bg=Instance.new("BodyGyro",hrp); bg.MaxTorque=Vector3.new(9e9,9e9,9e9); bg.P=10000; hu.PlatformStand=true; flyAct=true end end end
-
-local infJ, noclp, bhop, spin, sSpd, freecam, fPos, fRot, clickTP, antiAfk, rainbowOn = false, false, false, false, 5, false, nil, nil, false, false, false
+local infJ, noclp, bhop, spin, sSpd, freecam, fPos, fRot, clickTP, antiAfk, autoResp, chams, chamsCol = false, false, false, false, 5, false, nil, nil, false, false, false, false, Color3.fromRGB(255,50,50)
 local wallClimb, wallClimbBV = false, nil
 
-RS.Heartbeat:Connect(function()
+RS.Stepped:Connect(function()
     local hu = getHum()
-    if hu then 
-        if sprintOn then 
-            -- ФИКС СПРИНТА: проверяем зажат ли Shift напрямую
-            if UIS:IsKeyDown(Enum.KeyCode.LeftShift) then hu.WalkSpeed = sprintSpd else hu.WalkSpeed = baseSpeed end
-        else 
-            hu.WalkSpeed = baseSpeed 
-        end
-    end
+    if hu and not flyAct then if sprintOn then if UIS:IsKeyDown(Enum.KeyCode.LeftShift) then hu.WalkSpeed = sprintSpd else hu.WalkSpeed = baseSpeed end else hu.WalkSpeed = baseSpeed end end
+    if noclp then local ch=player.Character; if ch then for _,p in ipairs(ch:GetDescendants()) do if p:IsA("BasePart") then p.CanCollide=false end end end end
+    if bhop then if hu and (hu:GetState()==Enum.HumanoidStateType.Landed or hu:GetState()==Enum.HumanoidStateType.Running) then hu:ChangeState(Enum.HumanoidStateType.Jumping) end end
     if spin then local hrp=player.Character and player.Character:FindFirstChild("HumanoidRootPart"); if hrp then hrp.CFrame=hrp.CFrame*CFrame.Angles(0,math.rad(sSpd),0) end end
-    
-    if wallClimb and hu then
-        local ch=player.Character; local hrp=ch and ch:FindFirstChild("HumanoidRootPart")
-        if hrp and (fK.W or fK.A or fK.D) then
-            local prm=RaycastParams.new(); prm.FilterDescendantsInstances={ch}; prm.FilterType=Enum.RaycastFilterType.Exclude
-            local r=workspace:Raycast(hrp.Position, hrp.CFrame.LookVector * 3, prm)
-            if r then
-                if not wallClimbBV then wallClimbBV = Instance.new("BodyVelocity"); wallClimbBV.MaxForce = Vector3.new(1e5, 1e5, 1e5) end
-                wallClimbBV.Parent = hrp; wallClimbBV.Velocity = Vector3.new(0, 30, 0)
-            elseif wallClimbBV then wallClimbBV:Destroy(); wallClimbBV = nil end
-        elseif wallClimbBV then wallClimbBV:Destroy(); wallClimbBV = nil end
-    end
-    
-    if rainbowOn then
-        local ch = player.Character
-        if ch then
-            local hue = tick() % 1
-            for _, p in ipairs(ch:GetDescendants()) do
-                if p:IsA("BasePart") and p.Name ~= "HumanoidRootPart" then p.Color = Color3.fromHSV(hue, 1, 1) end
-            end
-        end
-    end
+    if wallClimb and hu then local ch=player.Character; local hrp=ch and ch:FindFirstChild("HumanoidRootPart"); if hrp and (fK.W or fK.A or fK.D) then local prm=RaycastParams.new(); prm.FilterDescendantsInstances={ch}; prm.FilterType=Enum.RaycastFilterType.Exclude; local r=workspace:Raycast(hrp.Position, hrp.CFrame.LookVector * 3, prm); if r then if not wallClimbBV then wallClimbBV = Instance.new("BodyVelocity"); wallClimbBV.MaxForce = Vector3.new(1e5, 1e5, 1e5) end; wallClimbBV.Parent = hrp; wallClimbBV.Velocity = Vector3.new(0, 30, 0) elseif wallClimbBV then wallClimbBV:Destroy(); wallClimbBV = nil end elseif wallClimbBV then wallClimbBV:Destroy(); wallClimbBV = nil end end
+    if chams then local ch=player.Character; if ch then for _,p in ipairs(ch:GetDescendants()) do if p:IsA("BasePart") and p.Name~="HumanoidRootPart" then p.Color=chamsCol end end end end
 end)
 
 RS.RenderStepped:Connect(function()
     if flyAct then local hrp=player.Character and player.Character:FindFirstChild("HumanoidRootPart"); if hrp and bv and bg then cam=workspace.CurrentCamera; local d=Vector3.zero; if fK.W then d=d+cam.CFrame.LookVector end; if fK.S then d=d-cam.CFrame.LookVector end; if fK.A then d=d-cam.CFrame.RightVector end; if fK.D then d=d+cam.CFrame.RightVector end; if fK.Space then d=d+Vector3.new(0,1,0) end; if fK.Ctrl then d=d-Vector3.new(0,1,0) end; bv.Velocity=d.Magnitude>0 and d.Unit*fSpd or Vector3.zero; bg.CFrame=cam.CFrame end end
     if freecam then cam=workspace.CurrentCamera; local d=Vector3.zero; if fK.W then d=d+fRot end; if fK.S then d=d-fRot end; if fK.A then d=d-fRot:Cross(Vector3.new(0,1,0)).Unit end; if fK.D then d=d+fRot:Cross(Vector3.new(0,1,0)).Unit end; fPos=fPos+d*1.5; cam.CFrame=CFrame.new(fPos, fPos+fRot) end
-end)
-
-RS.Stepped:Connect(function()
-    if noclp then local ch=player.Character; if ch then for _,p in ipairs(ch:GetDescendants()) do if p:IsA("BasePart") then p.CanCollide=false end end end end
-    if bhop then local hu=getHum(); if hu and (hu:GetState()==Enum.HumanoidStateType.Landed or hu:GetState()==Enum.HumanoidStateType.Running) then hu:ChangeState(Enum.HumanoidStateType.Jumping) end end
 end)
 
 UIS.JumpRequest:Connect(function() local hu=getHum(); if infJ and hu then hu:ChangeState(Enum.HumanoidStateType.Jumping) end end)
@@ -154,9 +154,9 @@ UIS.InputBegan:Connect(function(i,g)
 end)
 Plr.LocalPlayer.Idled:Connect(function() if antiAfk then VU:CaptureController(); VU:Button2Down(Vector2.new(0,0)); task.wait(1); VU:Button2Up(Vector2.new(0,0)) end end)
 
--- ESP & AIM & TRACERS
+-- ESP & AIM
 local espOn, espEn, espNm, espHp, espDs = false, false, false, false, false
-local hl, bb, trc, tL = {}, {}, false, {}
+local hl, bb = {}, {}
 local function clrEsp() for _,h in pairs(hl) do h:Destroy() end; for _,b in pairs(bb) do b:Destroy() end; hl, bb = {}, {} end
 local function mkEsp(t)
     if t==player or not t.Character or hl[t] or (espEn and t.Team==player.Team and player.Team) then return end
@@ -169,18 +169,10 @@ local function mkEsp(t)
 end
 task.spawn(function() while gui.Parent do task.wait(0.5); if espOn then for _,p in ipairs(Plr:GetPlayers()) do if p~=player then mkEsp(p) end end; local myH=player.Character and player.Character:FindFirstChild("HumanoidRootPart"); for p,h in pairs(hl) do if not p.Parent or not p.Character or (espEn and p.Team==player.Team and player.Team) then h:Destroy(); hl[p]=nil; if bb[p] then bb[p]:Destroy(); bb[p]=nil end else h.Adornee=p.Character; if bb[p] then local hu=p.Character:FindFirstChildOfClass("Humanoid"); local hp=bb[p]:FindFirstChild("HP",true); if hp and hu then hp.Size=UDim2.fromScale(math.clamp(hu.Health/hu.MaxHealth,0,1),1); hp.BackgroundColor3=hu.Health<hu.MaxHealth*0.3 and C_DNG or C_ACC end; local ds=bb[p]:FindFirstChild("Ds",true); if ds and myH and p.Character:FindFirstChild("HumanoidRootPart") then ds.Text=string.format("%.0fm",(myH.Position-p.Character.HumanoidRootPart.Position).Magnitude) end end end end end end end)
 
-RS.RenderStepped:Connect(function()
-    if trc and drawing then
-        cam=workspace.CurrentCamera; local bc=Vector2.new(cam.ViewportSize.X/2, cam.ViewportSize.Y)
-        for _,p in ipairs(Plr:GetPlayers()) do 
-            if p~=player and p.Character and p.Character:FindFirstChild("Head") then 
-                local s,o=cam:WorldToViewportPoint(p.Character.Head.Position)
-                if o and s.Z>0 then local l=tL[p]; if not l then l=drawing.new("Line"); l.Thickness=1.2; tL[p]=l end; l.From=bc; l.To=Vector2.new(s.X,s.Y); l.Color=getTeam(p); l.Visible=true 
-                else if tL[p] then tL[p].Visible=false end end
-            end
-        end
-    end
-end)
+local hbOn, hbSc = false, 1.6
+local function hbApp() if not hbOn then return end; for _,p in ipairs(Plr:GetPlayers()) do if p~=player and p.Character then for _,pt in ipairs(p.Character:GetDescendants()) do if pt:IsA("BasePart") and (pt.Name=="Head" or pt.Name=="HumanoidRootPart" or pt.Name=="UpperTorso" or pt.Name=="Torso") then if not pt:GetAttribute("os") then pt:SetAttribute("os",pt.Size); pt:SetAttribute("ot",pt.Transparency) end; pt.Size=pt:GetAttribute("os")*hbSc; pt.Transparency=0.5; pt.CanCollide=true end end end end end
+local function hbRes() for _,p in ipairs(Plr:GetPlayers()) do if p.Character then for _,pt in ipairs(p.Character:GetDescendants()) do if pt:IsA("BasePart") and pt:GetAttribute("os") then pt.Size=pt:GetAttribute("os"); pt.Transparency=pt:GetAttribute("ot") or 0; pt:SetAttribute("os",nil) end end end end end
+RS.Heartbeat:Connect(hbApp)
 
 local aim, aAuto, aHold, aWall = false, false, false, false
 local aFov, aSmth, aPrt, aIdx = 150, 0.35, "Head", 1
@@ -204,17 +196,20 @@ slider(cS, "Smoothness", 0, 0.95, 0.35, function(v) aSmth=v end)
 toggle(cS, "Auto Shoot", function() aAuto=true end, function() aAuto=false end)
 toggle(cS, "Wallcheck", function() aWall=true end, function() aWall=false end)
 do local b; b=btn(cS, "Part: "..aPrt, function() aIdx=aIdx%#aPrts+1; aPrt=aPrts[aIdx]; b.Text="  ▸ Part: "..aPrt end) end
+sect(cS, "Hitbox")
+toggle(cS, "Hitbox Expander", function() hbOn=true end, function() hbOn=false; hbRes() end)
+slider(cS, "Hitbox Scale", 1, 3, 1.6, function(v) hbSc=v; if hbOn then hbRes(); hbApp() end end)
 
 local vS = tabs["Visuals"].s
-sect(vS, "ESP & Visuals")
+sect(vS, "ESP")
 toggle(vS, "Wallhack / ESP", function() espOn=true end, function() espOn=false; clrEsp() end)
 toggle(vS, "Only enemies", function() espEn=true; clrEsp() end, function() espEn=false; clrEsp() end)
 toggle(vS, "Names", function() espNm=true; clrEsp() end, function() espNm=false; clrEsp() end)
 toggle(vS, "Health Bars", function() espHp=true; clrEsp() end, function() espHp=false; clrEsp() end)
 toggle(vS, "Distance", function() espDs=true; clrEsp() end, function() espDs=false; clrEsp() end)
-toggle(vS, "Tracers", function() if drawing then trc=true end end, function() trc=false; for _,l in pairs(tL) do l:Remove() end; tL={} end)
-toggle(vS, "Rainbow Aura", function() rainbowOn=true end, function() rainbowOn=false end)
-toggle(vS, "No Fog", function() Lgt.FogEnd=100000 end, function() Lgt.FogEnd=1000 end)
+sect(vS, "Rendering")
+toggle(vS, "Fullbright", function() Lgt.Brightness=2; Lgt.Ambient=Color3.new(1,1,1); Lgt.OutdoorAmbient=Color3.new(1,1,1) end, function() Lgt.Brightness=1; Lgt.Ambient=Color3.fromRGB(70,70,70) end)
+toggle(vS, "Chams (Color)", function() chams=true end, function() chams=false end)
 
 local mS = tabs["Movement"].s
 sect(mS, "Speed & Jump")
@@ -224,7 +219,7 @@ toggle(mS, "Infinite Jump", function() infJ=true end, function() infJ=false end)
 toggle(mS, "Noclip", function() noclp=true end, function() noclp=false end)
 toggle(mS, "Bhop", function() bhop=true end, function() bhop=false end)
 sect(mS, "Sprint (Shift)")
-toggle(mS, "Enable Sprint", function() sprintOn=true end, function() sprintOn=false; local h=getHum(); if h then h.WalkSpeed=baseSpeed end end)
+toggle(mS, "Enable Sprint", function() sprintOn=true end, function() sprintOn=false end)
 slider(mS, "Sprint Speed", 20, 250, 60, function(v) sprintSpd=v end)
 sect(mS, "Moves")
 toggle(mS, "Wall Climb (W+A/D)", function() wallClimb=true end, function() wallClimb=false end)
@@ -262,7 +257,7 @@ local sS = tabs["Settings"].s
 local function unloadCheat() 
     for _, f in ipairs(rst) do pcall(f) end; if bv then bv:Destroy() end; if bg then bg:Destroy() end
     local hu = getHum(); if hu then hu.PlatformStand=false; hu.WalkSpeed=16; hu.JumpPower=50 end
-    clrEsp(); for _,l in pairs(tL) do pcall(function() l:Remove() end) end; workspace.CurrentCamera.CameraType = Enum.CameraType.Custom
+    clrEsp(); workspace.CurrentCamera.CameraType = Enum.CameraType.Custom
     if gui then gui:Destroy() end; print("[Murder Cheats] UNLOADED.") 
 end
 sect(sS, "Danger Zone")
@@ -276,7 +271,7 @@ btn(sS, "UNLOAD CHEAT", function()
 end, C_DNG)
 
 for n,v in pairs(c.t) do if tg[n] and v then tg[n].set(true, false) end end
-for n,v in pairs(c.s) do if sl[n] then sl[n].set(v, true, false) end end
+for n,v in pairs(c.s) do if sl[n] then sl[n].set(v, true, true) end end
 
 local function openMenu() frm.Visible = true; uisc.Scale = 0.9; Twn:Create(uisc, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Scale = 1}):Play() end
 local function closeMenu() local t = Twn:Create(uisc, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Scale = 0.9}); t:Play(); t.Completed:Connect(function() frm.Visible = false end) end
