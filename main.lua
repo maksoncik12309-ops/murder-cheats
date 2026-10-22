@@ -1,5 +1,5 @@
 -- ============================================================
---  MURDER CHEATS v28 | Force Sprint + Draggable WM + New Funcs
+--  MURDER CHEATS v29 | Fixed Aimbot (IsMouseButtonPressed)
 -- ============================================================
 local UIS, RS, Plr, Lgt = game:GetService("UserInputService"), game:GetService("RunService"), game:GetService("Players"), game:GetService("Lighting")
 local VU, Http, Tp, Gui = game:GetService("VirtualUser"), game:GetService("HttpService"), game:GetService("TeleportService"), game:GetService("GuiService")
@@ -28,7 +28,7 @@ pBtn.MouseButton1Click:Connect(unlock); pI.FocusLost:Connect(unlock)
 repeat task.wait(0.1) until pOk
 
 -- КОНФИГИ
-local CF = "MC_v28.json"; local cfg = { c={default={t={},s={}}}, a="default", b="RightShift" }; local c = { t=cfg.c.default.t, s=cfg.c.default.s }
+local CF = "MC_v29.json"; local cfg = { c={default={t={},s={}}}, a="default", b="RightShift" }; local c = { t=cfg.c.default.t, s=cfg.c.default.s }
 local function save() cfg.c[cfg.a]={t=c.t,s=c.s}; if writefile then pcall(function() writefile(CF, Http:JSONEncode(cfg)) end) end end
 if isfile and readfile and isfile(CF) then local ok, d = pcall(function() return Http:JSONDecode(readfile(CF)) end); if ok and d.c then cfg=d; if cfg.c[cfg.a] then c.t=cfg.c[cfg.a].t; c.s=cfg.c[cfg.a].s end end end
 local bind = Enum.KeyCode[cfg.b] or Enum.KeyCode.RightShift
@@ -39,7 +39,7 @@ local frm = Instance.new("Frame", gui); frm.Size=UDim2.new(0,600,0,420); frm.Pos
 Instance.new("UICorner", frm).CornerRadius=UDim.new(0,12); Instance.new("UIStroke", frm).Color=C_ACC
 local uisc = Instance.new("UIScale", frm); uisc.Scale = 0.9
 
--- 💧 ПЕРЕДВИГАЕМЫЙ ВАТЕРМАРК
+-- ВАТЕРМАРК
 local wmFrame = Instance.new("Frame", gui)
 wmFrame.Size = UDim2.new(0, 160, 0, 26)
 wmFrame.Position = UDim2.new(0.5, -80, 1, -36)
@@ -47,7 +47,7 @@ wmFrame.BackgroundColor3 = C_BG
 wmFrame.BackgroundTransparency = 0.2
 wmFrame.BorderSizePixel = 0
 wmFrame.Active = true
-wmFrame.Draggable = true -- Делает его перетаскиваемым
+wmFrame.Draggable = true
 Instance.new("UICorner", wmFrame).CornerRadius = UDim.new(0, 6)
 local wmStroke = Instance.new("UIStroke", wmFrame); wmStroke.Color = C_ACC; wmStroke.Thickness = 1
 local wmText = Instance.new("TextLabel", wmFrame)
@@ -69,7 +69,6 @@ RS.RenderStepped:Connect(function()
     end
 end)
 
--- ОСТАЛЬНОЙ UI
 local sb = Instance.new("Frame", frm); sb.Size=UDim2.new(0,140,1,-20); sb.Position=UDim2.new(0,10,0,10); sb.BackgroundColor3=C_PNL
 Instance.new("UICorner", sb).CornerRadius=UDim.new(0,10)
 local brd = Instance.new("TextLabel", sb); brd.Size=UDim2.new(1,-16,0,40); brd.Position=UDim2.new(0,10,0,10); brd.BackgroundTransparency=1; brd.Font=Enum.Font.GothamBold; brd.TextSize=16; brd.TextColor3=C_TXT; brd.Text="MURDER\nCHEATS"; brd.TextXAlignment=Enum.TextXAlignment.Left
@@ -124,7 +123,7 @@ end
 local function getHum() local ch=player.Character; return ch and ch:FindFirstChildOfClass("Humanoid") end
 local function getTeam(p) return p.Team and p.Team.TeamColor.Color or C_ACC end
 
--- ФИКС СПРИНТА (Используем IsKeyDown + Принудительное применение)
+-- ЛОГИКА
 local fK = {W=false, A=false, S=false, D=false, Space=false, Ctrl=false}
 local sprintOn, sprintSpd, baseSpeed = false, 60, 16
 local flyAct, bv, bg, fSpd = false, nil, nil, 50
@@ -132,23 +131,25 @@ local function setFly(on) if bv then bv:Destroy() end; if bg then bg:Destroy() e
 
 local infJ, noclp, bhop, spin, sSpd, freecam, fPos, fRot, clickTP, antiAfk, autoResp, chams, chamsCol = false, false, false, false, 5, false, nil, nil, false, false, false, false, Color3.fromRGB(255,50,50)
 local wallClimb, wallClimbBV = false, nil
-local antiFling, hipHeight = false, 2
+local antiFling = false
 
-RS.Stepped:Connect(function()
+-- ПРИМЕНЕНИЕ СКОРОСТИ (Для надежного спринта)
+local function applySpeed()
     local hu = getHum()
     if hu and not flyAct then
-        -- Жесткий фикс спринта
         if sprintOn and UIS:IsKeyDown(Enum.KeyCode.LeftShift) then hu.WalkSpeed = sprintSpd 
         else hu.WalkSpeed = baseSpeed end
     end
-    
+end
+RS.Stepped:Connect(applySpeed)
+RS.RenderStepped:Connect(applySpeed)
+
+RS.Stepped:Connect(function()
+    local hu = getHum()
     if antiFling and hu then
         hu:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
         hu:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
-    else
-        if hu then hu:SetStateEnabled(Enum.HumanoidStateType.FallingDown, true); hu:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, true) end
-    end
-
+    else if hu then hu:SetStateEnabled(Enum.HumanoidStateType.FallingDown, true); hu:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, true) end end
     if noclp then local ch=player.Character; if ch then for _,p in ipairs(ch:GetDescendants()) do if p:IsA("BasePart") then p.CanCollide=false end end end end
     if bhop then if hu and (hu:GetState()==Enum.HumanoidStateType.Landed or hu:GetState()==Enum.HumanoidStateType.Running) then hu:ChangeState(Enum.HumanoidStateType.Jumping) end end
     if spin then local hrp=player.Character and player.Character:FindFirstChild("HumanoidRootPart"); if hrp then hrp.CFrame=hrp.CFrame*CFrame.Angles(0,math.rad(sSpd),0) end end
@@ -157,8 +158,9 @@ RS.Stepped:Connect(function()
 end)
 
 RS.RenderStepped:Connect(function()
-    if flyAct then local hrp=player.Character and player.Character:FindFirstChild("HumanoidRootPart"); if hrp and bv and bg then cam=workspace.CurrentCamera; local d=Vector3.zero; if fK.W then d=d+cam.CFrame.LookVector end; if fK.S then d=d-cam.CFrame.LookVector end; if fK.A then d=d-cam.CFrame.RightVector end; if fK.D then d=d+cam.CFrame.RightVector end; if fK.Space then d=d+Vector3.new(0,1,0) end; if fK.Ctrl then d=d-Vector3.new(0,1,0) end; bv.Velocity=d.Magnitude>0 and d.Unit*fSpd or Vector3.zero; bg.CFrame=cam.CFrame end end
-    if freecam then cam=workspace.CurrentCamera; local d=Vector3.zero; if fK.W then d=d+fRot end; if fK.S then d=d-fRot end; if fK.A then d=d-fRot:Cross(Vector3.new(0,1,0)).Unit end; if fK.D then d=d+fRot:Cross(Vector3.new(0,1,0)).Unit end; fPos=fPos+d*1.5; cam.CFrame=CFrame.new(fPos, fPos+fRot) end
+    cam = workspace.CurrentCamera
+    if flyAct then local hrp=player.Character and player.Character:FindFirstChild("HumanoidRootPart"); if hrp and bv and bg then local d=Vector3.zero; if fK.W then d=d+cam.CFrame.LookVector end; if fK.S then d=d-cam.CFrame.LookVector end; if fK.A then d=d-cam.CFrame.RightVector end; if fK.D then d=d+cam.CFrame.RightVector end; if fK.Space then d=d+Vector3.new(0,1,0) end; if fK.Ctrl then d=d-Vector3.new(0,1,0) end; bv.Velocity=d.Magnitude>0 and d.Unit*fSpd or Vector3.zero; bg.CFrame=cam.CFrame end end
+    if freecam then local d=Vector3.zero; if fK.W then d=d+fRot end; if fK.S then d=d-fRot end; if fK.A then d=d-fRot:Cross(Vector3.new(0,1,0)).Unit end; if fK.D then d=d+fRot:Cross(Vector3.new(0,1,0)).Unit end; fPos=fPos+d*1.5; cam.CFrame=CFrame.new(fPos, fPos+fRot) end
 end)
 
 UIS.JumpRequest:Connect(function() local hu=getHum(); if infJ and hu then hu:ChangeState(Enum.HumanoidStateType.Jumping) end end)
@@ -190,16 +192,38 @@ local function hbApp() if not hbOn then return end; for _,p in ipairs(Plr:GetPla
 local function hbRes() for _,p in ipairs(Plr:GetPlayers()) do if p.Character then for _,pt in ipairs(p.Character:GetDescendants()) do if pt:IsA("BasePart") and pt:GetAttribute("os") then pt.Size=pt:GetAttribute("os"); pt.Transparency=pt:GetAttribute("ot") or 0; pt:SetAttribute("os",nil) end end end end end
 RS.Heartbeat:Connect(hbApp)
 
-local aim, aAuto, aHold, aWall = false, false, false, false
+local aim, aAuto, aWall = false, false, false
 local aFov, aSmth, aPrt, aIdx = 150, 0.35, "Head", 1
 local aPrts = {"Head", "HumanoidRootPart", "UpperTorso"}
 local fovC = Instance.new("Frame", gui); fovC.Size=UDim2.new(0,aFov*2,0,aFov*2); fovC.AnchorPoint=Vector2.new(0.5,0.5); fovC.BackgroundTransparency=1; fovC.Visible=false; Instance.new("UICorner", fovC).CornerRadius=UDim.new(1,0); Instance.new("UIStroke", fovC).Color=C_ACC
 local function hasLOS(part) local prm=RaycastParams.new(); prm.FilterDescendantsInstances={player.Character}; prm.FilterType=Enum.RaycastFilterType.Exclude; local r=workspace:Raycast(cam.CFrame.Position, part.Position-cam.CFrame.Position, prm); if r then return r.Instance:IsDescendantOf(part.Parent) end; return true end
-local function getTgt(fv) cam=workspace.CurrentCamera; local m=UIS:GetMouseLocation()-Vector2.new(0,Gui:GetGuiInset().Y); local best, dist = nil, fv or aFov; for _,p in ipairs(Plr:GetPlayers()) do if p~=player and p.Character and not (espEn and p.Team==player.Team and player.Team) then local pt=p.Character:FindFirstChild(aPrt); local hu=p.Character:FindFirstChildOfClass("Humanoid"); if pt and hu and hu.Health>0 and (not aWall or hasLOS(pt)) then local s,o=cam:WorldToViewportPoint(pt.Position); if o and s.Z>0 then local d=(Vector2.new(s.X,s.Y)-m).Magnitude; if d<dist then dist=d; best=pt end end end end end; return best end
+local function getTgt(fv) 
+    cam = workspace.CurrentCamera
+    local m=UIS:GetMouseLocation()-Vector2.new(0,Gui:GetGuiInset().Y); 
+    local best, dist = nil, fv or aFov; 
+    for _,p in ipairs(Plr:GetPlayers()) do 
+        if p~=player and p.Character and not (espEn and p.Team==player.Team and player.Team) then 
+            local pt=p.Character:FindFirstChild(aPrt); local hu=p.Character:FindFirstChildOfClass("Humanoid"); 
+            if pt and hu and hu.Health>0 and (not aWall or hasLOS(pt)) then 
+                local s,o=cam:WorldToViewportPoint(pt.Position); 
+                if o and s.Z>0 then 
+                    local d=(Vector2.new(s.X,s.Y)-m).Magnitude; 
+                    if d<dist then dist=d; best=pt end 
+                end 
+            end 
+        end 
+    end; 
+    return best 
+end
+
+-- ФИКС АИМА (Используем IsMouseButtonPressed)
 RS.RenderStepped:Connect(function()
     if fovC.Visible then fovC.Position=UDim2.fromOffset(UIS:GetMouseLocation().X, UIS:GetMouseLocation().Y) end
-    if aim and aHold then local t=getTgt(); if t then cam.CFrame=cam.CFrame:Lerp(CFrame.new(cam.CFrame.Position, t.Position), 1-math.clamp(aSmth,0,0.99)) end end
-    if aim and aAuto and aHold and getTgt() then VU:CaptureController(); VU:ClickButton1(Vector2.new(cam.ViewportSize.X/2, cam.ViewportSize.Y/2)) end
+    if aim and UIS:IsMouseButtonPressed(Enum.UserInputType.MouseButton2) then 
+        local t=getTgt(); 
+        if t then cam.CFrame=cam.CFrame:Lerp(CFrame.new(cam.CFrame.Position, t.Position), 1-math.clamp(aSmth,0,0.99)) end 
+    end
+    if aim and aAuto and UIS:IsMouseButtonPressed(Enum.UserInputType.MouseButton2) and getTgt() then VU:CaptureController(); VU:ClickButton1(Vector2.new(cam.ViewportSize.X/2, cam.ViewportSize.Y/2)) end
 end)
 
 -- UI TABS
@@ -302,10 +326,8 @@ UIS.InputBegan:Connect(function(i, g)
     if i.KeyCode==bind and not g then if frm.Visible then closeMenu() else openMenu() end return end
     if g then return end
     if i.KeyCode==Enum.KeyCode.W then fK.W=true elseif i.KeyCode==Enum.KeyCode.A then fK.A=true elseif i.KeyCode==Enum.KeyCode.S then fK.S=true elseif i.KeyCode==Enum.KeyCode.D then fK.D=true elseif i.KeyCode==Enum.KeyCode.Space then fK.Space=true elseif i.KeyCode==Enum.KeyCode.LeftControl then fK.Ctrl=true end
-    if i.UserInputType==Enum.UserInputType.MouseButton2 then aHold=true end
 end)
 UIS.InputEnded:Connect(function(i)
     if i.KeyCode==Enum.KeyCode.W then fK.W=false elseif i.KeyCode==Enum.KeyCode.A then fK.A=false elseif i.KeyCode==Enum.KeyCode.S then fK.S=false elseif i.KeyCode==Enum.KeyCode.D then fK.D=false elseif i.KeyCode==Enum.KeyCode.Space then fK.Space=false elseif i.KeyCode==Enum.KeyCode.LeftControl then fK.Ctrl=false end
-    if i.UserInputType==Enum.UserInputType.MouseButton2 then aHold=false end
 end)
 player.CharacterAdded:Connect(function() task.wait(0.5); for n,t in pairs(tg) do if t.get() then pcall(t.set, true, false) end end end)
