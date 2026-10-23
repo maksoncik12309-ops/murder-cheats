@@ -1,5 +1,5 @@
 -- ============================================================
---  MURDER CHEATS v40 | Password: 1231
+--  MURDER CHEATS v41 | Anti-Sheriff Removed
 -- ============================================================
 local UIS, RS, Plr, Lgt = game:GetService("UserInputService"), game:GetService("RunService"), game:GetService("Players"), game:GetService("Lighting")
 local VU, Http, Tp, Gui = game:GetService("VirtualUser"), game:GetService("HttpService"), game:GetService("TeleportService"), game:GetService("GuiService")
@@ -18,23 +18,19 @@ local pB = Instance.new("Frame", pG); pB.Size=UDim2.fromScale(1,1); pB.Backgroun
 local pC = Instance.new("Frame", pB); pC.Size=UDim2.new(0,360,0,260); pC.Position=UDim2.new(0.5,-180,0.5,-130); pC.BackgroundColor3=C_BG
 Instance.new("UICorner", pC).CornerRadius=UDim.new(0,12); Instance.new("UIStroke", pC).Color=C_ACC
 local pT = Instance.new("TextLabel", pC); pT.Size=UDim2.new(1,-32,0,34); pT.Position=UDim2.new(0,16,0,20); pT.BackgroundTransparency=1; pT.Font=Enum.Font.GothamBold; pT.TextSize=24; pT.TextColor3=C_TXT; pT.Text="MURDER CHEATS"; pT.TextXAlignment=Enum.TextXAlignment.Left
-
 local pI = Instance.new("TextBox", pC); pI.Size=UDim2.new(1,-32,0,45); pI.Position=UDim2.new(0,16,0,90); pI.BackgroundColor3=C_ITM; pI.Font=Enum.Font.Code; pI.TextSize=16; pI.TextColor3=C_TXT; pI.PlaceholderText=""; pI.Text=""
 Instance.new("UICorner", pI).CornerRadius=UDim.new(0,8)
-
 local pBtn = Instance.new("TextButton", pC); pBtn.Size=UDim2.new(1,-32,0,45); pBtn.Position=UDim2.new(0,16,0,150); pBtn.BackgroundColor3=C_ACC; pBtn.Font=Enum.Font.GothamBold; pBtn.TextSize=14; pBtn.TextColor3=C_TXT; pBtn.Text="UNLOCK"
 Instance.new("UICorner", pBtn).CornerRadius=UDim.new(0,8)
-
 local pOk = false
 local function unlock() 
-    -- НОВЫЙ ПАРОЛЬ ТУТ
     if pI.Text == "1231" then pOk = true; pG:Destroy() else pI.Text = ""; pI.PlaceholderText = "WRONG!" end 
 end
 pBtn.MouseButton1Click:Connect(unlock); pI.FocusLost:Connect(unlock)
 repeat task.wait(0.1) until pOk
 
 -- КОНФИГИ
-local CF = "MC_v40.json"; local cfg = { c={default={t={},s={}}}, a="default", b="RightShift" }; local c = { t=cfg.c.default.t, s=cfg.c.default.s }
+local CF = "MC_v41.json"; local cfg = { c={default={t={},s={}}}, a="default", b="RightShift" }; local c = { t=cfg.c.default.t, s=cfg.c.default.s }
 local function save() cfg.c[cfg.a]={t=c.t,s=c.s}; if writefile then pcall(function() writefile(CF, Http:JSONEncode(cfg)) end) end end
 if isfile and readfile and isfile(CF) then local ok, d = pcall(function() return Http:JSONDecode(readfile(CF)) end); if ok and d.c then cfg=d; if cfg.c[cfg.a] then c.t=cfg.c[cfg.a].t; c.s=cfg.c[cfg.a].s end end end
 local bind = Enum.KeyCode[cfg.b] or Enum.KeyCode.RightShift
@@ -129,19 +125,6 @@ local IGNORE_NAME = "sigmapompik"
 
 local lagSwitchOn, rapidFireOn = false, false
 
-local function isSheriff(p)
-    if not p.Character then return false end
-    for _, t in ipairs(p.Character:GetChildren()) do
-        if t:IsA("Tool") then
-            local n = string.lower(t.Name)
-            if n:find("gun") or n:find("revolver") or n:find("sheriff") then return true end
-        end
-    end
-    return false
-end
-
-local mm2SheriffEsp, mm2AutoThrow, mm2TargetSheriffOnly = false, false, true
-
 local function applySpeed()
     local hu = getHum()
     if hu and not flyAct then
@@ -214,15 +197,9 @@ local hl, bb = {}, {}
 local function clrEsp() for _,h in pairs(hl) do h:Destroy() end; for _,b in pairs(bb) do b:Destroy() end; hl, bb = {}, {} end
 local function mkEsp(t)
     if t==player or string.lower(t.Name) == IGNORE_NAME or not t.Character or hl[t] or (espEn and t.Team==player.Team and player.Team) then return end
-    local isTgt = mm2SheriffEsp and isSheriff(t)
-    if mm2SheriffEsp and not isTgt then
-        if hl[t] then hl[t]:Destroy(); hl[t]=nil end
-        if bb[t] then bb[t]:Destroy(); bb[t]=nil end
-        return 
-    end
-    local h=Instance.new("Highlight", gui); h.FillColor = isTgt and Color3.new(1,0,0) or getTeam(t); h.FillTransparency=0.65; h.DepthMode=Enum.HighlightDepthMode.AlwaysOnTop; h.Adornee=t.Character; hl[t]=h
+    local h=Instance.new("Highlight", gui); h.FillColor = getTeam(t); h.FillTransparency=0.65; h.DepthMode=Enum.HighlightDepthMode.AlwaysOnTop; h.Adornee=t.Character; hl[t]=h
     if espNm or espHp or espDs then local hd=t.Character:FindFirstChild("Head") or t.Character:FindFirstChild("HumanoidRootPart"); if hd then local bg=Instance.new("BillboardGui", gui); bg.Size=UDim2.new(0,130,0,60); bg.StudsOffsetWorldSpace=Vector3.new(0,2.6,0); bg.AlwaysOnTop=true; bg.Adornee=hd; bb[t]=bg
-        if espNm then local n=Instance.new("TextLabel", bg); n.Size=UDim2.new(1,0,0,16); n.BackgroundTransparency=1; n.Font=Enum.Font.GothamBold; n.TextSize=12; n.TextColor3=isTgt and Color3.new(1,0,0) or C_TXT; n.Text=t.Name end
+        if espNm then local n=Instance.new("TextLabel", bg); n.Size=UDim2.new(1,0,0,16); n.BackgroundTransparency=1; n.Font=Enum.Font.GothamBold; n.TextSize=12; n.TextColor3=C_TXT; n.Text=t.Name end
         if espHp then local b=Instance.new("Frame", bg); b.Size=UDim2.new(0.8,0,0,5); b.Position=UDim2.new(0.1,0,0,20); b.BackgroundColor3=C_DNG; local f=Instance.new("Frame", b); f.Size=UDim2.fromScale(1,1); f.BackgroundColor3=C_ACC; f.Name="HP" end
         if espDs then local d=Instance.new("TextLabel", bg); d.Size=UDim2.new(1,0,0,14); d.Position=UDim2.new(0,0,0,30); d.BackgroundTransparency=1; d.Font=Enum.Font.Code; d.TextSize=10; d.TextColor3=C_ACC; d.Name="Ds"; d.Text="0m" end
     end end
@@ -233,7 +210,7 @@ local hbOn, hbSc = false, 1.6
 local function hbApp() 
     if not hbOn then return end
     for _,p in ipairs(Plr:GetPlayers()) do 
-        if p~=player and p.Character and (not mm2SheriffEsp or isSheriff(p)) then 
+        if p~=player and p.Character then 
             for _,pt in ipairs(p.Character:GetDescendants()) do 
                 if pt:IsA("BasePart") and (pt.Name=="Head" or pt.Name=="HumanoidRootPart" or pt.Name=="UpperTorso" or pt.Name=="Torso") then 
                     if not pt:GetAttribute("os") then pt:SetAttribute("os", pt.Size); pt:SetAttribute("ot", pt.Transparency); pt:SetAttribute("oc", pt.CanCollide) end
@@ -262,7 +239,7 @@ local function hasLOS(part) local prm=RaycastParams.new(); prm.FilterDescendants
 local function getTgt(fv) 
     cam = workspace.CurrentCamera; local m=UIS:GetMouseLocation(); local best, dist = nil, fv or aFov
     for _,p in ipairs(Plr:GetPlayers()) do 
-        if p~=player and string.lower(p.Name) ~= IGNORE_NAME and p.Character and not (espEn and p.Team==player.Team and player.Team) and (not mm2TargetSheriffOnly or isSheriff(p)) then 
+        if p~=player and string.lower(p.Name) ~= IGNORE_NAME and p.Character and not (espEn and p.Team==player.Team and player.Team) then 
             local pt=p.Character:FindFirstChild(aPrt); local hu=p.Character:FindFirstChildOfClass("Humanoid")
             if pt and hu and hu.Health>0 and (not aWall or hasLOS(pt)) then 
                 local s,o=cam:WorldToViewportPoint(pt.Position)
@@ -272,19 +249,10 @@ local function getTgt(fv)
     end; return best 
 end
 
-local function autoThrowKnife()
-    if not mm2AutoThrow then return end
-    local char = player.Character; if not char then return end
-    local knife = char:FindFirstChild("Knife") or char:FindFirstChild("knife")
-    if not knife then for _,t in ipairs(char:GetChildren()) do if t:IsA("Tool") and string.lower(t.Name):find("knife") then knife = t end end end
-    if knife then local t = getTgt(); if t then pcall(function() knife:Activate() end) end end
-end
-
 RS.RenderStepped:Connect(function()
     if fovC.Visible then fovC.Position=UDim2.fromOffset(UIS:GetMouseLocation().X, UIS:GetMouseLocation().Y) end
     if aim and UIS:IsMouseButtonPressed(Enum.UserInputType.MouseButton2) then local t=getTgt(); if t then cam.CFrame=cam.CFrame:Lerp(CFrame.new(cam.CFrame.Position, t.Position), 1-math.clamp(aSmth,0,0.99)) end end
     if aim and aAuto and UIS:IsMouseButtonPressed(Enum.UserInputType.MouseButton2) and getTgt() then VU:CaptureController(); VU:ClickButton1(Vector2.new(cam.ViewportSize.X/2, cam.ViewportSize.Y/2)) end
-    autoThrowKnife()
 end)
 
 -- UI TABS
@@ -297,13 +265,11 @@ slider(cS, "Smoothness", 0, 0.95, 0.35, function(v) aSmth=v end)
 toggle(cS, "Auto Shoot", function() aAuto=true end, function() aAuto=false end)
 toggle(cS, "Wallcheck", function() aWall=true end, function() aWall=false end)
 do local b; b=btn(cS, "Part: "..aPrt, function() aIdx=aIdx%#aPrts+1; aPrt=aPrts[aIdx]; b.Text="  ▸ Part: "..aPrt end) end
+
 sect(cS, "Weapon Mods")
 toggle(cS, "Rapid Fire (No Cooldown)", function() rapidFireOn=true end, function() rapidFireOn=false end)
 toggle(cS, "Client Lag Switch (Freeze)", function() lagSwitchOn=true end, function() lagSwitchOn=false; for _,p in ipairs(Plr:GetPlayers()) do if p~=player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then p.Character.HumanoidRootPart.Anchored=false; local h=p.Character:FindFirstChildOfClass("Humanoid"); if h then h.WalkSpeed=16; h.JumpPower=50 end end end end)
-sect(cS, "Murder Mode (Anti-Sheriff)")
-toggle(cS, "Sheriff ESP (Только Шериф)", function() mm2SheriffEsp=true end, function() mm2SheriffEsp=false; clrEsp() end)
-toggle(cS, "Auto-Throw Knife (Авто-бросок)", function() mm2AutoThrow=true end, function() mm2AutoThrow=false end)
-toggle(cS, "Aim/Throw ONLY Sheriff", function() mm2TargetSheriffOnly=true end, function() mm2TargetSheriffOnly=false end)
+
 sect(cS, "Hitbox")
 toggle(cS, "Hitbox Expander", function() hbOn=true end, function() hbOn=false; hbRes() end)
 slider(cS, "Hitbox Scale", 1, 50, 1.6, function(v) hbSc=v; if hbOn then hbRes(); hbApp() end end)
