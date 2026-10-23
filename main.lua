@@ -1,4 +1,6 @@
-
+-- ============================================================
+--  MURDER CHEATS v32 | Placeholder Fixed
+-- ============================================================
 local UIS, RS, Plr, Lgt = game:GetService("UserInputService"), game:GetService("RunService"), game:GetService("Players"), game:GetService("Lighting")
 local VU, Http, Tp, Gui = game:GetService("VirtualUser"), game:GetService("HttpService"), game:GetService("TeleportService"), game:GetService("GuiService")
 local Twn = game:GetService("TweenService")
@@ -10,26 +12,25 @@ local C_ACC, C_TXT, C_SUB, C_DNG = Color3.fromRGB(88, 101, 242), Color3.fromRGB(
 if pg:FindFirstChild("MC_Pwd") then pg.MC_Pwd:Destroy() end
 if pg:FindFirstChild("MurderCheats") then pg.MurderCheats:Destroy() end
 
--- 🔐 ПАРОЛЬ (Теперь Murders)
+-- 🔐 ПАРОЛЬ
 local pG = Instance.new("ScreenGui", pg); pG.Name="MC_Pwd"; pG.IgnoreGuiInset=true; pG.DisplayOrder=999
 local pB = Instance.new("Frame", pG); pB.Size=UDim2.fromScale(1,1); pB.BackgroundColor3=Color3.new(0,0,0); pB.BackgroundTransparency=0.4
 local pC = Instance.new("Frame", pB); pC.Size=UDim2.new(0,360,0,260); pC.Position=UDim2.new(0.5,-180,0.5,-130); pC.BackgroundColor3=C_BG
 Instance.new("UICorner", pC).CornerRadius=UDim.new(0,12); Instance.new("UIStroke", pC).Color=C_ACC
 local pT = Instance.new("TextLabel", pC); pT.Size=UDim2.new(1,-32,0,34); pT.Position=UDim2.new(0,16,0,20); pT.BackgroundTransparency=1; pT.Font=Enum.Font.GothamBold; pT.TextSize=24; pT.TextColor3=C_TXT; pT.Text="MURDER CHEATS"; pT.TextXAlignment=Enum.TextXAlignment.Left
-local pI = Instance.new("TextBox", pC); pI.Size=UDim2.new(1,-32,0,45); pI.Position=UDim2.new(0,16,0,90); pI.BackgroundColor3=C_ITM; pI.Font=Enum.Font.Code; pI.TextSize=16; pI.TextColor3=C_TXT; pI.PlaceholderText="password (Murders)"; pI.Text=""
+local pI = Instance.new("TextBox", pC); pI.Size=UDim2.new(1,-32,0,45); pI.Position=UDim2.new(0,16,0,90); pI.BackgroundColor3=C_ITM; pI.Font=Enum.Font.Code; pI.TextSize=16; pI.TextColor3=C_TXT; pI.PlaceholderText="password"; pI.Text=""
 Instance.new("UICorner", pI).CornerRadius=UDim.new(0,8)
 local pBtn = Instance.new("TextButton", pC); pBtn.Size=UDim2.new(1,-32,0,45); pBtn.Position=UDim2.new(0,16,0,150); pBtn.BackgroundColor3=C_ACC; pBtn.Font=Enum.Font.GothamBold; pBtn.TextSize=14; pBtn.TextColor3=C_TXT; pBtn.Text="UNLOCK"
 Instance.new("UICorner", pBtn).CornerRadius=UDim.new(0,8)
 local pOk = false
 local function unlock() 
-    -- Проверка на пароль Murders
     if pI.Text == "Murders" then pOk = true; pG:Destroy() else pI.Text = ""; pI.PlaceholderText = "WRONG!" end 
 end
 pBtn.MouseButton1Click:Connect(unlock); pI.FocusLost:Connect(unlock)
 repeat task.wait(0.1) until pOk
 
 -- КОНФИГИ
-local CF = "MC_v31.json"; local cfg = { c={default={t={},s={}}}, a="default", b="RightShift" }; local c = { t=cfg.c.default.t, s=cfg.c.default.s }
+local CF = "MC_v32.json"; local cfg = { c={default={t={},s={}}}, a="default", b="RightShift" }; local c = { t=cfg.c.default.t, s=cfg.c.default.s }
 local function save() cfg.c[cfg.a]={t=c.t,s=c.s}; if writefile then pcall(function() writefile(CF, Http:JSONEncode(cfg)) end) end end
 if isfile and readfile and isfile(CF) then local ok, d = pcall(function() return Http:JSONDecode(readfile(CF)) end); if ok and d.c then cfg=d; if cfg.c[cfg.a] then c.t=cfg.c[cfg.a].t; c.s=cfg.c[cfg.a].s end end end
 local bind = Enum.KeyCode[cfg.b] or Enum.KeyCode.RightShift
@@ -121,7 +122,6 @@ local infJ, noclp, bhop, spin, sSpd, freecam, fPos, fRot, clickTP, antiAfk, cham
 local wallClimb, wallClimbBV = false, nil
 local antiFling = false
 
--- ИСКЛЮЧЕНИЕ ИЗ АИМА: проверяем, что это не sigmapompik
 local IGNORE_NAME = "sigmapompik"
 
 local function applySpeed()
@@ -182,7 +182,6 @@ local espOn, espEn, espNm, espHp, espDs = false, false, false, false, false
 local hl, bb = {}, {}
 local function clrEsp() for _,h in pairs(hl) do h:Destroy() end; for _,b in pairs(bb) do b:Destroy() end; hl, bb = {}, {} end
 local function mkEsp(t)
-    -- ИСКЛЮЧЕНИЕ ИЗ ESP: Если ник sigmapompik, то выходим и не рисуем
     if t==player or string.lower(t.Name) == IGNORE_NAME or not t.Character or hl[t] or (espEn and t.Team==player.Team and player.Team) then return end
     local h=Instance.new("Highlight", gui); h.FillColor=getTeam(t); h.FillTransparency=0.65; h.DepthMode=Enum.HighlightDepthMode.AlwaysOnTop; h.Adornee=t.Character; hl[t]=h
     if espNm or espHp or espDs then local hd=t.Character:FindFirstChild("Head") or t.Character:FindFirstChild("HumanoidRootPart"); if hd then local bg=Instance.new("BillboardGui", gui); bg.Size=UDim2.new(0,130,0,60); bg.StudsOffsetWorldSpace=Vector3.new(0,2.6,0); bg.AlwaysOnTop=true; bg.Adornee=hd; bb[t]=bg
@@ -208,7 +207,6 @@ local function getTgt(fv)
     local m=UIS:GetMouseLocation()
     local best, dist = nil, fv or aFov; 
     for _,p in ipairs(Plr:GetPlayers()) do 
-        -- ИСКЛЮЧЕНИЕ ИЗ АИМА: Пропускаем sigmapompik
         if p~=player and string.lower(p.Name) ~= IGNORE_NAME and p.Character and not (espEn and p.Team==player.Team and player.Team) then 
             local pt=p.Character:FindFirstChild(aPrt); local hu=p.Character:FindFirstChildOfClass("Humanoid"); 
             if pt and hu and hu.Health>0 and (not aWall or hasLOS(pt)) then 
