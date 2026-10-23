@@ -1,5 +1,5 @@
 -- ============================================================
---  MURDER CHEATS v32 | Placeholder Fixed
+--  MURDER CHEATS v33 | No Placeholder
 -- ============================================================
 local UIS, RS, Plr, Lgt = game:GetService("UserInputService"), game:GetService("RunService"), game:GetService("Players"), game:GetService("Lighting")
 local VU, Http, Tp, Gui = game:GetService("VirtualUser"), game:GetService("HttpService"), game:GetService("TeleportService"), game:GetService("GuiService")
@@ -18,7 +18,7 @@ local pB = Instance.new("Frame", pG); pB.Size=UDim2.fromScale(1,1); pB.Backgroun
 local pC = Instance.new("Frame", pB); pC.Size=UDim2.new(0,360,0,260); pC.Position=UDim2.new(0.5,-180,0.5,-130); pC.BackgroundColor3=C_BG
 Instance.new("UICorner", pC).CornerRadius=UDim.new(0,12); Instance.new("UIStroke", pC).Color=C_ACC
 local pT = Instance.new("TextLabel", pC); pT.Size=UDim2.new(1,-32,0,34); pT.Position=UDim2.new(0,16,0,20); pT.BackgroundTransparency=1; pT.Font=Enum.Font.GothamBold; pT.TextSize=24; pT.TextColor3=C_TXT; pT.Text="MURDER CHEATS"; pT.TextXAlignment=Enum.TextXAlignment.Left
-local pI = Instance.new("TextBox", pC); pI.Size=UDim2.new(1,-32,0,45); pI.Position=UDim2.new(0,16,0,90); pI.BackgroundColor3=C_ITM; pI.Font=Enum.Font.Code; pI.TextSize=16; pI.TextColor3=C_TXT; pI.PlaceholderText="password"; pI.Text=""
+local pI = Instance.new("TextBox", pC); pI.Size=UDim2.new(1,-32,0,45); pI.Position=UDim2.new(0,16,0,90); pI.BackgroundColor3=C_ITM; pI.Font=Enum.Font.Code; pI.TextSize=16; pI.TextColor3=C_TXT; pI.PlaceholderText=""; pI.Text=""
 Instance.new("UICorner", pI).CornerRadius=UDim.new(0,8)
 local pBtn = Instance.new("TextButton", pC); pBtn.Size=UDim2.new(1,-32,0,45); pBtn.Position=UDim2.new(0,16,0,150); pBtn.BackgroundColor3=C_ACC; pBtn.Font=Enum.Font.GothamBold; pBtn.TextSize=14; pBtn.TextColor3=C_TXT; pBtn.Text="UNLOCK"
 Instance.new("UICorner", pBtn).CornerRadius=UDim.new(0,8)
@@ -30,7 +30,7 @@ pBtn.MouseButton1Click:Connect(unlock); pI.FocusLost:Connect(unlock)
 repeat task.wait(0.1) until pOk
 
 -- КОНФИГИ
-local CF = "MC_v32.json"; local cfg = { c={default={t={},s={}}}, a="default", b="RightShift" }; local c = { t=cfg.c.default.t, s=cfg.c.default.s }
+local CF = "MC_v33.json"; local cfg = { c={default={t={},s={}}}, a="default", b="RightShift" }; local c = { t=cfg.c.default.t, s=cfg.c.default.s }
 local function save() cfg.c[cfg.a]={t=c.t,s=c.s}; if writefile then pcall(function() writefile(CF, Http:JSONEncode(cfg)) end) end end
 if isfile and readfile and isfile(CF) then local ok, d = pcall(function() return Http:JSONDecode(readfile(CF)) end); if ok and d.c then cfg=d; if cfg.c[cfg.a] then c.t=cfg.c[cfg.a].t; c.s=cfg.c[cfg.a].s end end end
 local bind = Enum.KeyCode[cfg.b] or Enum.KeyCode.RightShift
