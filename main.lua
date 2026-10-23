@@ -1,5 +1,5 @@
 -- ============================================================
---  MURDER CHEATS v41 | Anti-Sheriff Removed
+--  MURDER CHEATS v42 | No Rapid Fire/Lag Switch + Password Close
 -- ============================================================
 local UIS, RS, Plr, Lgt = game:GetService("UserInputService"), game:GetService("RunService"), game:GetService("Players"), game:GetService("Lighting")
 local VU, Http, Tp, Gui = game:GetService("VirtualUser"), game:GetService("HttpService"), game:GetService("TeleportService"), game:GetService("GuiService")
@@ -12,12 +12,29 @@ local C_ACC, C_TXT, C_SUB, C_DNG = Color3.fromRGB(88, 101, 242), Color3.fromRGB(
 if pg:FindFirstChild("MC_Pwd") then pg.MC_Pwd:Destroy() end
 if pg:FindFirstChild("MurderCheats") then pg.MurderCheats:Destroy() end
 
--- 🔐 ПАРОЛЬ
+-- 🔐 ПАРОЛЬ (С КРЕСТИКОМ)
 local pG = Instance.new("ScreenGui", pg); pG.Name="MC_Pwd"; pG.IgnoreGuiInset=true; pG.DisplayOrder=999
 local pB = Instance.new("Frame", pG); pB.Size=UDim2.fromScale(1,1); pB.BackgroundColor3=Color3.new(0,0,0); pB.BackgroundTransparency=0.4
 local pC = Instance.new("Frame", pB); pC.Size=UDim2.new(0,360,0,260); pC.Position=UDim2.new(0.5,-180,0.5,-130); pC.BackgroundColor3=C_BG
 Instance.new("UICorner", pC).CornerRadius=UDim.new(0,12); Instance.new("UIStroke", pC).Color=C_ACC
+
 local pT = Instance.new("TextLabel", pC); pT.Size=UDim2.new(1,-32,0,34); pT.Position=UDim2.new(0,16,0,20); pT.BackgroundTransparency=1; pT.Font=Enum.Font.GothamBold; pT.TextSize=24; pT.TextColor3=C_TXT; pT.Text="MURDER CHEATS"; pT.TextXAlignment=Enum.TextXAlignment.Left
+
+-- КРЕСТИК ЗАКРЫТИЯ ПАРОЛЯ
+local pClose = Instance.new("TextButton", pC)
+pClose.Size = UDim2.new(0, 24, 0, 24)
+pClose.Position = UDim2.new(1, -34, 0, 12)
+pClose.BackgroundColor3 = C_DNG
+pClose.Text = "✕"
+pClose.Font = Enum.Font.GothamBold
+pClose.TextSize = 12
+pClose.TextColor3 = C_TXT
+Instance.new("UICorner", pClose).CornerRadius = UDim.new(0, 6)
+pClose.MouseButton1Click:Connect(function() 
+    pG:Destroy() 
+    error("Password closed by user.") -- Останавливаем скрипт
+end)
+
 local pI = Instance.new("TextBox", pC); pI.Size=UDim2.new(1,-32,0,45); pI.Position=UDim2.new(0,16,0,90); pI.BackgroundColor3=C_ITM; pI.Font=Enum.Font.Code; pI.TextSize=16; pI.TextColor3=C_TXT; pI.PlaceholderText=""; pI.Text=""
 Instance.new("UICorner", pI).CornerRadius=UDim.new(0,8)
 local pBtn = Instance.new("TextButton", pC); pBtn.Size=UDim2.new(1,-32,0,45); pBtn.Position=UDim2.new(0,16,0,150); pBtn.BackgroundColor3=C_ACC; pBtn.Font=Enum.Font.GothamBold; pBtn.TextSize=14; pBtn.TextColor3=C_TXT; pBtn.Text="UNLOCK"
@@ -30,7 +47,7 @@ pBtn.MouseButton1Click:Connect(unlock); pI.FocusLost:Connect(unlock)
 repeat task.wait(0.1) until pOk
 
 -- КОНФИГИ
-local CF = "MC_v41.json"; local cfg = { c={default={t={},s={}}}, a="default", b="RightShift" }; local c = { t=cfg.c.default.t, s=cfg.c.default.s }
+local CF = "MC_v42.json"; local cfg = { c={default={t={},s={}}}, a="default", b="RightShift" }; local c = { t=cfg.c.default.t, s=cfg.c.default.s }
 local function save() cfg.c[cfg.a]={t=c.t,s=c.s}; if writefile then pcall(function() writefile(CF, Http:JSONEncode(cfg)) end) end end
 if isfile and readfile and isfile(CF) then local ok, d = pcall(function() return Http:JSONDecode(readfile(CF)) end); if ok and d.c then cfg=d; if cfg.c[cfg.a] then c.t=cfg.c[cfg.a].t; c.s=cfg.c[cfg.a].s end end end
 local bind = Enum.KeyCode[cfg.b] or Enum.KeyCode.RightShift
@@ -123,8 +140,6 @@ local wallClimb, wallClimbBV = false, nil
 local antiFling = false
 local IGNORE_NAME = "sigmapompik"
 
-local lagSwitchOn, rapidFireOn = false, false
-
 local function applySpeed()
     local hu = getHum()
     if hu and not flyAct then
@@ -157,29 +172,12 @@ RS.Stepped:Connect(function()
     if spin then local hrp=player.Character and player.Character:FindFirstChild("HumanoidRootPart"); if hrp then hrp.CFrame=hrp.CFrame*CFrame.Angles(0,math.rad(sSpd),0) end end
     if wallClimb and hu then local ch=player.Character; local hrp=ch and ch:FindFirstChild("HumanoidRootPart"); if hrp and (fK.W or fK.A or fK.D) then local prm=RaycastParams.new(); prm.FilterDescendantsInstances={ch}; prm.FilterType=Enum.RaycastFilterType.Exclude; local r=workspace:Raycast(hrp.Position, hrp.CFrame.LookVector * 3, prm); if r then if not wallClimbBV then wallClimbBV = Instance.new("BodyVelocity"); wallClimbBV.MaxForce = Vector3.new(1e5, 1e5, 1e5) end; wallClimbBV.Parent = hrp; wallClimbBV.Velocity = Vector3.new(0, 30, 0) elseif wallClimbBV then wallClimbBV:Destroy(); wallClimbBV = nil end elseif wallClimbBV then wallClimbBV:Destroy(); wallClimbBV = nil end end
     if chams then local ch=player.Character; if ch then for _,p in ipairs(ch:GetDescendants()) do if p:IsA("BasePart") and p.Name~="HumanoidRootPart" then p.Color=chamsCol end end end end
-
-    if lagSwitchOn then
-        for _,p in ipairs(Plr:GetPlayers()) do
-            if p ~= player and p.Character then
-                local hrp = p.Character:FindFirstChild("HumanoidRootPart")
-                if hrp then hrp.Anchored = true; hrp.Velocity = Vector3.zero; local hu = p.Character:FindFirstChildOfClass("Humanoid"); if hu then hu.WalkSpeed = 0; hu.JumpPower = 0 end end
-            end
-        end
-    end
 end)
 
 RS.RenderStepped:Connect(function()
     cam = workspace.CurrentCamera
     if flyAct then local hrp=player.Character and player.Character:FindFirstChild("HumanoidRootPart"); if hrp and bv and bg then local d=Vector3.zero; if fK.W then d=d+cam.CFrame.LookVector end; if fK.S then d=d-cam.CFrame.LookVector end; if fK.A then d=d-cam.CFrame.RightVector end; if fK.D then d=d+cam.CFrame.RightVector end; if fK.Space then d=d+Vector3.new(0,1,0) end; if fK.Ctrl then d=d-Vector3.new(0,1,0) end; bv.Velocity=d.Magnitude>0 and d.Unit*fSpd or Vector3.zero; bg.CFrame=cam.CFrame end end
     if freecam then local d=Vector3.zero; if fK.W then d=d+fRot end; if fK.S then d=d-fRot end; if fK.A then d=d-fRot:Cross(Vector3.new(0,1,0)).Unit end; if fK.D then d=d+fRot:Cross(Vector3.new(0,1,0)).Unit end; fPos=fPos+d*1.5; cam.CFrame=CFrame.new(fPos, fPos+fRot) end
-
-    if rapidFireOn and UIS:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) then
-        local char = player.Character
-        if char then
-            local tool = char:FindFirstChildOfClass("Tool")
-            if tool then local n = string.lower(tool.Name); if n:find("gun") or n:find("revolver") or n:find("knife") then pcall(function() tool:Activate() end) end end
-        end
-    end
 end)
 
 UIS.JumpRequest:Connect(function() local hu=getHum(); if infJ and hu then hu:ChangeState(Enum.HumanoidStateType.Jumping) end end)
@@ -265,10 +263,6 @@ slider(cS, "Smoothness", 0, 0.95, 0.35, function(v) aSmth=v end)
 toggle(cS, "Auto Shoot", function() aAuto=true end, function() aAuto=false end)
 toggle(cS, "Wallcheck", function() aWall=true end, function() aWall=false end)
 do local b; b=btn(cS, "Part: "..aPrt, function() aIdx=aIdx%#aPrts+1; aPrt=aPrts[aIdx]; b.Text="  ▸ Part: "..aPrt end) end
-
-sect(cS, "Weapon Mods")
-toggle(cS, "Rapid Fire (No Cooldown)", function() rapidFireOn=true end, function() rapidFireOn=false end)
-toggle(cS, "Client Lag Switch (Freeze)", function() lagSwitchOn=true end, function() lagSwitchOn=false; for _,p in ipairs(Plr:GetPlayers()) do if p~=player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then p.Character.HumanoidRootPart.Anchored=false; local h=p.Character:FindFirstChildOfClass("Humanoid"); if h then h.WalkSpeed=16; h.JumpPower=50 end end end end)
 
 sect(cS, "Hitbox")
 toggle(cS, "Hitbox Expander", function() hbOn=true end, function() hbOn=false; hbRes() end)
