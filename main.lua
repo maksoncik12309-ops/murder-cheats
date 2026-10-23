@@ -1,6 +1,4 @@
--- ============================================================
---  SCREAMER (Jumpscare on Inject)
--- ============================================================
+
 local player = game:GetService("Players").LocalPlayer
 local pg = player:WaitForChild("PlayerGui")
 local Twn = game:GetService("TweenService")
