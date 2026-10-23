@@ -1,90 +1,58 @@
 -- ============================================================
---  FAKE CHOICE (KICK ON BOTH)
+--  SCREAMER (Jumpscare on Inject)
 -- ============================================================
 local player = game:GetService("Players").LocalPlayer
 local pg = player:WaitForChild("PlayerGui")
+local Twn = game:GetService("TweenService")
+
+-- Ждем 2 секунды, чтобы ты переключился в окно игры
+task.wait(2)
 
 local gui = Instance.new("ScreenGui")
-gui.Name = "FakeChoice"
+gui.Name = "Screamer"
 gui.IgnoreGuiInset = true
-gui.DisplayOrder = 999999
+gui.DisplayOrder = 2147483647 -- Максимальный приоритет (поверх всего)
 gui.Parent = pg
 
--- Задний фон
+-- Черный фон на весь экран
 local bg = Instance.new("Frame", gui)
 bg.Size = UDim2.fromScale(1, 1)
-bg.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-bg.BackgroundTransparency = 0.4
+bg.BackgroundColor3 = Color3.new(0, 0, 0)
+bg.BorderSizePixel = 0
 
--- Само меню
-local frm = Instance.new("Frame", bg)
-frm.Size = UDim2.new(0, 400, 0, 220)
-frm.Position = UDim2.new(0.5, -200, 0.5, -110)
-frm.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
-frm.BorderSizePixel = 0
-Instance.new("UICorner", frm).CornerRadius = UDim.new(0, 12)
-local stroke = Instance.new("UIStroke", frm)
-stroke.Color = Color3.fromRGB(237, 66, 69)
-stroke.Thickness = 2
+-- Сама страшная картинка
+local img = Instance.new("ImageLabel", bg)
+img.Size = UDim2.fromScale(1, 1)
+img.BackgroundTransparency = 1
+-- Ссылка на страшную рожу (стандартный ассет Roblox)
+img.Image = "rbxassetid://1360716087" 
+img.ImageTransparency = 1 -- Изначально невидима для плавного появления
 
--- Заголовок
-local title = Instance.new("TextLabel", frm)
-title.Size = UDim2.new(1, -40, 0, 40)
-title.Position = UDim2.new(0, 20, 0, 20)
-title.BackgroundTransparency = 1
-title.Font = Enum.Font.GothamBold
-title.TextSize = 20
-title.TextColor3 = Color3.fromRGB(255, 255, 255)
-title.Text = "ВЫБЕРИ СВОЮ СУДЬБУ"
+-- Звук (громкий резкий бас/крик)
+local sound = Instance.new("Sound", gui)
+sound.SoundId = "rbxassetid://138062075" -- Громкий скример
+sound.Volume = 10 -- Максимальная громкость
+sound.PlayOnRemove = false
+sound:Play()
 
-local sub = Instance.new("TextLabel", frm)
-sub.Size = UDim2.new(1, -40, 0, 20)
-sub.Position = UDim2.new(0, 20, 0, 60)
-sub.BackgroundTransparency = 1
-sub.Font = Enum.Font.Gotham
-sub.TextSize = 14
-sub.TextColor3 = Color3.fromRGB(160, 160, 170)
-sub.Text = "Оба варианта приведут к одному исходу..."
+-- Анимация резкого появления
+task.wait(0.1)
+Twn:Create(img, TweenInfo.new(0.05, Enum.EasingStyle.Linear), {ImageTransparency = 0}):Play()
+Twn:Create(bg, TweenInfo.new(0.1), {BackgroundColor3 = Color3.new(1, 1, 1)}):Play()
+task.wait(0.1)
+Twn:Create(bg, TweenInfo.new(0.1), {BackgroundColor3 = Color3.new(0, 0, 0)}):Play()
 
--- Функция кика
-local function kickPlayer(reason)
-    pcall(function()
-        player:Kick(reason)
-    end)
+-- Тряска экрана
+for i = 1, 20 do
+    local offsetX = math.random(-50, 50)
+    local offsetY = math.random(-50, 50)
+    bg.Position = UDim2.fromOffset(offsetX, offsetY)
+    task.wait(0.02)
 end
 
--- Кнопка 1
-local btn1 = Instance.new("TextButton", frm)
-btn1.Size = UDim2.new(1, -60, 0, 40)
-btn1.Position = UDim2.new(0, 30, 0, 100)
-btn1.BackgroundColor3 = Color3.fromRGB(237, 66, 69)
-btn1.Text = "Пойти нахуй"
-btn1.Font = Enum.Font.GothamBold
-btn1.TextSize = 14
-btn1.TextColor3 = Color3.fromRGB(255, 255, 255)
-Instance.new("UICorner", btn1).CornerRadius = UDim.new(0, 6)
-btn1.MouseButton1Click:Connect(function()
-    kickPlayer("Ты выбрал пойти нахуй. Скатертью дорога.")
-end)
-
--- Кнопка 2
-local btn2 = Instance.new("TextButton", frm)
-btn2.Size = UDim2.new(1, -60, 0, 40)
-btn2.Position = UDim2.new(0, 30, 0, 150)
-btn2.BackgroundColor3 = Color3.fromRGB(50, 50, 60)
-btn2.Text = "Не идти нахуй"
-btn2.Font = Enum.Font.GothamBold
-btn2.TextSize = 14
-btn2.TextColor3 = Color3.fromRGB(255, 255, 255)
-Instance.new("UICorner", btn2).CornerRadius = UDim.new(0, 6)
-btn2.MouseButton1Click:Connect(function()
-    kickPlayer("Ты пытался съехать, но всё равно пошёл нахуй. GG.")
-end)
-
--- Анимация появления
-frm.Size = UDim2.new(0, 300, 0, 180)
-frm.Position = UDim2.new(0.5, -150, 0.5, -90)
-game:GetService("TweenService"):Create(frm, TweenInfo.new(0.3, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-    Size = UDim2.new(0, 400, 0, 220),
-    Position = UDim2.new(0.5, -200, 0.5, -110)
-}):Play()
+-- Через 3 секунды скример исчезает
+task.wait(3)
+Twn:Create(img, TweenInfo.new(0.5), {ImageTransparency = 1}):Play()
+Twn:Create(bg, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
+task.wait(0.5)
+gui:Destroy()
