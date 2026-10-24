@@ -1,4 +1,6 @@
-
+-- ============================================================
+--  MURDER CHEATS v44 | Fun Tab Update (Exit Spectate + Pranks)
+-- ============================================================
 local UIS, RS, Plr, Lgt = game:GetService("UserInputService"), game:GetService("RunService"), game:GetService("Players"), game:GetService("Lighting")
 local VU, Http, Tp, Gui = game:GetService("VirtualUser"), game:GetService("HttpService"), game:GetService("TeleportService"), game:GetService("GuiService")
 local Twn = game:GetService("TweenService")
@@ -30,7 +32,7 @@ pBtn.MouseButton1Click:Connect(unlock); pI.FocusLost:Connect(unlock)
 repeat task.wait(0.1) until pOk
 
 -- КОНФИГИ
-local CF = "MC_v43.json"; local cfg = { c={default={t={},s={}}}, a="default", b="RightShift" }; local c = { t=cfg.c.default.t, s=cfg.c.default.s }
+local CF = "MC_v44.json"; local cfg = { c={default={t={},s={}}}, a="default", b="RightShift" }; local c = { t=cfg.c.default.t, s=cfg.c.default.s }
 local function save() cfg.c[cfg.a]={t=c.t,s=c.s}; if writefile then pcall(function() writefile(CF, Http:JSONEncode(cfg)) end) end end
 if isfile and readfile and isfile(CF) then local ok, d = pcall(function() return Http:JSONDecode(readfile(CF)) end); if ok and d.c then cfg=d; if cfg.c[cfg.a] then c.t=cfg.c[cfg.a].t; c.s=cfg.c[cfg.a].s end end end
 local bind = Enum.KeyCode[cfg.b] or Enum.KeyCode.RightShift
@@ -122,21 +124,52 @@ local infJ, noclp, bhop, spin, sSpd, freecam, fPos, fRot, clickTP, antiAfk, cham
 local wallClimb, wallClimbBV = false, nil
 local antiFling = false
 
--- FUN TAB LOGIC
-local headless, rainbow = false, false
-local function setHeadless(on)
+-- FUN TAB ЛОГИКА
+local isInvisible, isEarthquake, isDancing = false, false, false
+local currentScale = 1
+
+local function setInvisible(on)
     local char = player.Character
     if not char then return end
-    local head = char:FindFirstChild("Head")
-    if head then head.Transparency = on and 1 or 0 end
+    for _, p in ipairs(char:GetDescendants()) do
+        if p:IsA("BasePart") then p.Transparency = on and 1 or 0
+        elseif p:IsA("Decal") then p.Transparency = on and 1 or 0 end
+    end
 end
-RS.Heartbeat:Connect(function()
-    if rainbow then
-        local char = player.Character
-        if char then
-            local hue = tick() % 1
-            for _, p in ipairs(char:GetDescendants()) do
-                if p:IsA("BasePart") and p.Name ~= "HumanoidRootPart" then p.Color = Color3.fromHSV(hue, 1, 1) end
+
+local function setScale(s)
+    local hum = getHum()
+    if hum then
+        hum.BodyDepthScale.Value = s
+        hum.BodyWidthScale.Value = s
+        hum.BodyHeightScale.Value = s
+        hum.HeadScale.Value = s
+    end
+end
+
+local function stopSpectate()
+    local hum = getHum()
+    if hum then
+        cam.CameraSubject = hum
+        cam.CameraType = Enum.CameraType.Custom
+    end
+end
+
+local danceAnim = Instance.new("Animation")
+danceAnim.AnimationId = "rbxassetid://507771019" -- R15 Dance
+
+RS.RenderStepped:Connect(function()
+    if isEarthquake then
+        local shake = CFrame.new(math.random(-2,2), math.random(-2,2), math.random(-2,2))
+        cam.CFrame = cam.CFrame * shake
+    end
+    if isDancing then
+        local hum = getHum()
+        if hum then
+            local animator = hum:FindFirstChildOfClass("Animator")
+            if animator then
+                local track = animator:LoadAnimation(danceAnim)
+                if not track.IsPlaying then track:Play() end
             end
         end
     end
@@ -300,14 +333,12 @@ toggle(mS, "Wall Climb (W+A/D)", function() wallClimb=true end, function() wallC
 toggle(mS, "Fly (WASD)", function() setFly(true) end, function() setFly(false) end)
 slider(mS, "Fly Speed", 10, 300, 50, function(v) fSpd=v end)
 
--- FUN TAB
+-- ===== FUN TAB =====
 local fS = tabs["Fun"].s
-sect(fS, "Visual Pranks")
-toggle(fS, "Rainbow Character", function() rainbow=true end, function() rainbow=false end)
-toggle(fS, "Headless (Local)", function() headless=true; setHeadless(true) end, function() headless=false; setHeadless(false) end)
 
-sect(fS, "Spectate Player")
-local plrList = Instance.new("ScrollingFrame", fS); plrList.Size=UDim2.new(1,0,0,150); plrList.BackgroundTransparency=1; plrList.BorderSizePixel=0; plrList.ScrollBarThickness=2; plrList.ScrollBarImageColor3=C_ACC; plrList.AutomaticCanvasSize=Enum.AutomaticSize.Y
+sect(fS, "Spectate")
+btn(fS, "Exit Spectate", function() stopSpectate() end, C_DNG)
+local plrList = Instance.new("ScrollingFrame", fS); plrList.Size=UDim2.new(1,0,0,120); plrList.BackgroundTransparency=1; plrList.BorderSizePixel=0; plrList.ScrollBarThickness=2; plrList.ScrollBarImageColor3=C_ACC; plrList.AutomaticCanvasSize=Enum.AutomaticSize.Y
 Instance.new("UIListLayout", plrList).Padding=UDim.new(0,4)
 task.spawn(function()
     while gui.Parent do
@@ -315,20 +346,29 @@ task.spawn(function()
         for _,c in ipairs(plrList:GetChildren()) do if c:IsA("TextButton") then c:Destroy() end end
         for _,p in ipairs(Plr:GetPlayers()) do
             if p ~= player then
-                local b = btn(plrList, p.Name, function()
+                btn(plrList, p.Name, function()
                     local char = p.Character
                     if char then
                         local hum = char:FindFirstChildOfClass("Humanoid")
-                        if hum then
-                            cam.CameraSubject = hum
-                        end
+                        if hum then cam.CameraSubject = hum end
                     end
-                end, C_ACC)
-                b.Size = UDim2.new(1, -6, 0, 28)
+                end, C_ACC).Size = UDim2.new(1, -6, 0, 26)
             end
         end
     end
 end)
+
+sect(fS, "Trolls & Visuals")
+toggle(fS, "Invisible", function() isInvisible = true; setInvisible(true) end, function() isInvisible = false; setInvisible(false) end)
+toggle(fS, "Earthquake (Camera)", function() isEarthquake = true end, function() isEarthquake = false end)
+toggle(fS, "Dance", function() isDancing = true end, function() isDancing = false end)
+slider(fS, "Character Size", 0.1, 5, 1, function(v) currentScale = v; setScale(v) end)
+btn(fS, "Flip Character (180)", function() 
+    local hrp = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+    if hrp then hrp.CFrame = hrp.CFrame * CFrame.Angles(0, math.rad(180), 0) end
+end, C_ACC)
+
+-- ====================
 
 local uS = tabs["Utility"].s
 sect(uS, "Camera & TP")
