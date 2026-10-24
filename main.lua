@@ -1,6 +1,4 @@
--- ============================================================
---  MURDER CHEATS v42 | No Rapid Fire/Lag Switch + Password Close
--- ============================================================
+
 local UIS, RS, Plr, Lgt = game:GetService("UserInputService"), game:GetService("RunService"), game:GetService("Players"), game:GetService("Lighting")
 local VU, Http, Tp, Gui = game:GetService("VirtualUser"), game:GetService("HttpService"), game:GetService("TeleportService"), game:GetService("GuiService")
 local Twn = game:GetService("TweenService")
@@ -12,42 +10,27 @@ local C_ACC, C_TXT, C_SUB, C_DNG = Color3.fromRGB(88, 101, 242), Color3.fromRGB(
 if pg:FindFirstChild("MC_Pwd") then pg.MC_Pwd:Destroy() end
 if pg:FindFirstChild("MurderCheats") then pg.MurderCheats:Destroy() end
 
--- 🔐 ПАРОЛЬ (С КРЕСТИКОМ)
+-- 🔐 ПАРОЛЬ
 local pG = Instance.new("ScreenGui", pg); pG.Name="MC_Pwd"; pG.IgnoreGuiInset=true; pG.DisplayOrder=999
 local pB = Instance.new("Frame", pG); pB.Size=UDim2.fromScale(1,1); pB.BackgroundColor3=Color3.new(0,0,0); pB.BackgroundTransparency=0.4
 local pC = Instance.new("Frame", pB); pC.Size=UDim2.new(0,360,0,260); pC.Position=UDim2.new(0.5,-180,0.5,-130); pC.BackgroundColor3=C_BG
 Instance.new("UICorner", pC).CornerRadius=UDim.new(0,12); Instance.new("UIStroke", pC).Color=C_ACC
-
 local pT = Instance.new("TextLabel", pC); pT.Size=UDim2.new(1,-32,0,34); pT.Position=UDim2.new(0,16,0,20); pT.BackgroundTransparency=1; pT.Font=Enum.Font.GothamBold; pT.TextSize=24; pT.TextColor3=C_TXT; pT.Text="MURDER CHEATS"; pT.TextXAlignment=Enum.TextXAlignment.Left
-
--- КРЕСТИК ЗАКРЫТИЯ ПАРОЛЯ
-local pClose = Instance.new("TextButton", pC)
-pClose.Size = UDim2.new(0, 24, 0, 24)
-pClose.Position = UDim2.new(1, -34, 0, 12)
-pClose.BackgroundColor3 = C_DNG
-pClose.Text = "✕"
-pClose.Font = Enum.Font.GothamBold
-pClose.TextSize = 12
-pClose.TextColor3 = C_TXT
-Instance.new("UICorner", pClose).CornerRadius = UDim.new(0, 6)
-pClose.MouseButton1Click:Connect(function() 
-    pG:Destroy() 
-    error("Password closed by user.") -- Останавливаем скрипт
-end)
+local pClose = Instance.new("TextButton", pC); pClose.Size=UDim2.new(0,24,0,24); pClose.Position=UDim2.new(1,-34,0,12); pClose.BackgroundColor3=C_DNG; pClose.Text="✕"; pClose.Font=Enum.Font.GothamBold; pClose.TextSize=12; pClose.TextColor3=C_TXT
+Instance.new("UICorner", pClose).CornerRadius=UDim.new(0,6)
+pClose.MouseButton1Click:Connect(function() pG:Destroy(); error("Password closed.") end)
 
 local pI = Instance.new("TextBox", pC); pI.Size=UDim2.new(1,-32,0,45); pI.Position=UDim2.new(0,16,0,90); pI.BackgroundColor3=C_ITM; pI.Font=Enum.Font.Code; pI.TextSize=16; pI.TextColor3=C_TXT; pI.PlaceholderText=""; pI.Text=""
 Instance.new("UICorner", pI).CornerRadius=UDim.new(0,8)
 local pBtn = Instance.new("TextButton", pC); pBtn.Size=UDim2.new(1,-32,0,45); pBtn.Position=UDim2.new(0,16,0,150); pBtn.BackgroundColor3=C_ACC; pBtn.Font=Enum.Font.GothamBold; pBtn.TextSize=14; pBtn.TextColor3=C_TXT; pBtn.Text="UNLOCK"
 Instance.new("UICorner", pBtn).CornerRadius=UDim.new(0,8)
 local pOk = false
-local function unlock() 
-    if pI.Text == "1231" then pOk = true; pG:Destroy() else pI.Text = ""; pI.PlaceholderText = "WRONG!" end 
-end
+local function unlock() if pI.Text == "1231" then pOk = true; pG:Destroy() else pI.Text = ""; pI.PlaceholderText = "WRONG!" end end
 pBtn.MouseButton1Click:Connect(unlock); pI.FocusLost:Connect(unlock)
 repeat task.wait(0.1) until pOk
 
 -- КОНФИГИ
-local CF = "MC_v42.json"; local cfg = { c={default={t={},s={}}}, a="default", b="RightShift" }; local c = { t=cfg.c.default.t, s=cfg.c.default.s }
+local CF = "MC_v43.json"; local cfg = { c={default={t={},s={}}}, a="default", b="RightShift" }; local c = { t=cfg.c.default.t, s=cfg.c.default.s }
 local function save() cfg.c[cfg.a]={t=c.t,s=c.s}; if writefile then pcall(function() writefile(CF, Http:JSONEncode(cfg)) end) end end
 if isfile and readfile and isfile(CF) then local ok, d = pcall(function() return Http:JSONDecode(readfile(CF)) end); if ok and d.c then cfg=d; if cfg.c[cfg.a] then c.t=cfg.c[cfg.a].t; c.s=cfg.c[cfg.a].s end end end
 local bind = Enum.KeyCode[cfg.b] or Enum.KeyCode.RightShift
@@ -90,7 +73,7 @@ local function mkTab(n)
     local s = Instance.new("ScrollingFrame", ca); s.Size=UDim2.fromScale(1,1); s.BackgroundTransparency=1; s.ScrollBarThickness=3; s.ScrollBarImageColor3=C_ACC; s.AutomaticCanvasSize=Enum.AutomaticSize.Y; s.Visible=false; s.Active=false
     Instance.new("UIListLayout", s).Padding=UDim.new(0,6); tabs[n]={b=b, s=s}
 end
-for _, n in ipairs({"Combat", "Visuals", "Movement", "Utility", "Config", "Settings"}) do mkTab(n); tabs[n].b.MouseButton1Click:Connect(function()
+for _, n in ipairs({"Combat", "Visuals", "Movement", "Fun", "Utility", "Config", "Settings"}) do mkTab(n); tabs[n].b.MouseButton1Click:Connect(function()
     for n2, t in pairs(tabs) do t.s.Visible = (n2==n); t.s.Active = (n2==n); t.b.BackgroundTransparency = (n2==n) and 0 or 0.5; t.b.TextColor3 = (n2==n) and C_TXT or C_SUB end
 end) end
 
@@ -138,7 +121,26 @@ local function setFly(on) if bv then bv:Destroy() end; if bg then bg:Destroy() e
 local infJ, noclp, bhop, spin, sSpd, freecam, fPos, fRot, clickTP, antiAfk, chams, chamsCol = false, false, false, false, 5, false, nil, nil, false, false, false, Color3.fromRGB(255,50,50)
 local wallClimb, wallClimbBV = false, nil
 local antiFling = false
-local IGNORE_NAME = "sigmapompik"
+
+-- FUN TAB LOGIC
+local headless, rainbow = false, false
+local function setHeadless(on)
+    local char = player.Character
+    if not char then return end
+    local head = char:FindFirstChild("Head")
+    if head then head.Transparency = on and 1 or 0 end
+end
+RS.Heartbeat:Connect(function()
+    if rainbow then
+        local char = player.Character
+        if char then
+            local hue = tick() % 1
+            for _, p in ipairs(char:GetDescendants()) do
+                if p:IsA("BasePart") and p.Name ~= "HumanoidRootPart" then p.Color = Color3.fromHSV(hue, 1, 1) end
+            end
+        end
+    end
+end)
 
 local function applySpeed()
     local hu = getHum()
@@ -194,7 +196,7 @@ local espOn, espEn, espNm, espHp, espDs = false, false, false, false, false
 local hl, bb = {}, {}
 local function clrEsp() for _,h in pairs(hl) do h:Destroy() end; for _,b in pairs(bb) do b:Destroy() end; hl, bb = {}, {} end
 local function mkEsp(t)
-    if t==player or string.lower(t.Name) == IGNORE_NAME or not t.Character or hl[t] or (espEn and t.Team==player.Team and player.Team) then return end
+    if t==player or not t.Character or hl[t] or (espEn and t.Team==player.Team and player.Team) then return end
     local h=Instance.new("Highlight", gui); h.FillColor = getTeam(t); h.FillTransparency=0.65; h.DepthMode=Enum.HighlightDepthMode.AlwaysOnTop; h.Adornee=t.Character; hl[t]=h
     if espNm or espHp or espDs then local hd=t.Character:FindFirstChild("Head") or t.Character:FindFirstChild("HumanoidRootPart"); if hd then local bg=Instance.new("BillboardGui", gui); bg.Size=UDim2.new(0,130,0,60); bg.StudsOffsetWorldSpace=Vector3.new(0,2.6,0); bg.AlwaysOnTop=true; bg.Adornee=hd; bb[t]=bg
         if espNm then local n=Instance.new("TextLabel", bg); n.Size=UDim2.new(1,0,0,16); n.BackgroundTransparency=1; n.Font=Enum.Font.GothamBold; n.TextSize=12; n.TextColor3=C_TXT; n.Text=t.Name end
@@ -202,7 +204,7 @@ local function mkEsp(t)
         if espDs then local d=Instance.new("TextLabel", bg); d.Size=UDim2.new(1,0,0,14); d.Position=UDim2.new(0,0,0,30); d.BackgroundTransparency=1; d.Font=Enum.Font.Code; d.TextSize=10; d.TextColor3=C_ACC; d.Name="Ds"; d.Text="0m" end
     end end
 end
-task.spawn(function() while gui.Parent do task.wait(0.5); if espOn then for _,p in ipairs(Plr:GetPlayers()) do if p~=player then mkEsp(p) end end; local myH=player.Character and player.Character:FindFirstChild("HumanoidRootPart"); for p,h in pairs(hl) do if not p.Parent or not p.Character or string.lower(p.Name) == IGNORE_NAME or (espEn and p.Team==player.Team and player.Team) then h:Destroy(); hl[p]=nil; if bb[p] then bb[p]:Destroy(); bb[p]=nil end else h.Adornee=p.Character; if bb[p] then local hu=p.Character:FindFirstChildOfClass("Humanoid"); local hp=bb[p]:FindFirstChild("HP",true); if hp and hu then hp.Size=UDim2.fromScale(math.clamp(hu.Health/hu.MaxHealth,0,1),1); hp.BackgroundColor3=hu.Health<hu.MaxHealth*0.3 and C_DNG or C_ACC end; local ds=bb[p]:FindFirstChild("Ds",true); if ds and myH and p.Character:FindFirstChild("HumanoidRootPart") then ds.Text=string.format("%.0fm",(myH.Position-p.Character.HumanoidRootPart.Position).Magnitude) end end end end end end end)
+task.spawn(function() while gui.Parent do task.wait(0.5); if espOn then for _,p in ipairs(Plr:GetPlayers()) do if p~=player then mkEsp(p) end end; local myH=player.Character and player.Character:FindFirstChild("HumanoidRootPart"); for p,h in pairs(hl) do if not p.Parent or not p.Character or (espEn and p.Team==player.Team and player.Team) then h:Destroy(); hl[p]=nil; if bb[p] then bb[p]:Destroy(); bb[p]=nil end else h.Adornee=p.Character; if bb[p] then local hu=p.Character:FindFirstChildOfClass("Humanoid"); local hp=bb[p]:FindFirstChild("HP",true); if hp and hu then hp.Size=UDim2.fromScale(math.clamp(hu.Health/hu.MaxHealth,0,1),1); hp.BackgroundColor3=hu.Health<hu.MaxHealth*0.3 and C_DNG or C_ACC end; local ds=bb[p]:FindFirstChild("Ds",true); if ds and myH and p.Character:FindFirstChild("HumanoidRootPart") then ds.Text=string.format("%.0fm",(myH.Position-p.Character.HumanoidRootPart.Position).Magnitude) end end end end end end end)
 
 local hbOn, hbSc = false, 1.6
 local function hbApp() 
@@ -237,7 +239,7 @@ local function hasLOS(part) local prm=RaycastParams.new(); prm.FilterDescendants
 local function getTgt(fv) 
     cam = workspace.CurrentCamera; local m=UIS:GetMouseLocation(); local best, dist = nil, fv or aFov
     for _,p in ipairs(Plr:GetPlayers()) do 
-        if p~=player and string.lower(p.Name) ~= IGNORE_NAME and p.Character and not (espEn and p.Team==player.Team and player.Team) then 
+        if p~=player and p.Character and not (espEn and p.Team==player.Team and player.Team) then 
             local pt=p.Character:FindFirstChild(aPrt); local hu=p.Character:FindFirstChildOfClass("Humanoid")
             if pt and hu and hu.Health>0 and (not aWall or hasLOS(pt)) then 
                 local s,o=cam:WorldToViewportPoint(pt.Position)
@@ -298,9 +300,39 @@ toggle(mS, "Wall Climb (W+A/D)", function() wallClimb=true end, function() wallC
 toggle(mS, "Fly (WASD)", function() setFly(true) end, function() setFly(false) end)
 slider(mS, "Fly Speed", 10, 300, 50, function(v) fSpd=v end)
 
+-- FUN TAB
+local fS = tabs["Fun"].s
+sect(fS, "Visual Pranks")
+toggle(fS, "Rainbow Character", function() rainbow=true end, function() rainbow=false end)
+toggle(fS, "Headless (Local)", function() headless=true; setHeadless(true) end, function() headless=false; setHeadless(false) end)
+
+sect(fS, "Spectate Player")
+local plrList = Instance.new("ScrollingFrame", fS); plrList.Size=UDim2.new(1,0,0,150); plrList.BackgroundTransparency=1; plrList.BorderSizePixel=0; plrList.ScrollBarThickness=2; plrList.ScrollBarImageColor3=C_ACC; plrList.AutomaticCanvasSize=Enum.AutomaticSize.Y
+Instance.new("UIListLayout", plrList).Padding=UDim.new(0,4)
+task.spawn(function()
+    while gui.Parent do
+        task.wait(1)
+        for _,c in ipairs(plrList:GetChildren()) do if c:IsA("TextButton") then c:Destroy() end end
+        for _,p in ipairs(Plr:GetPlayers()) do
+            if p ~= player then
+                local b = btn(plrList, p.Name, function()
+                    local char = p.Character
+                    if char then
+                        local hum = char:FindFirstChildOfClass("Humanoid")
+                        if hum then
+                            cam.CameraSubject = hum
+                        end
+                    end
+                end, C_ACC)
+                b.Size = UDim2.new(1, -6, 0, 28)
+            end
+        end
+    end
+end)
+
 local uS = tabs["Utility"].s
 sect(uS, "Camera & TP")
-toggle(uS, "Freecam", function() freecam=true; local c=workspace.CurrentCamera; fPos=c.CFrame.Position; fRot=c.CFrame.LookVector; c.CameraType=Enum.CameraType.Scriptable end, function() freecam=false; workspace.CurrentCamera.CameraType=Enum.CameraType.Custom end)
+toggle(uS, "Freecam", function() freecam=true; local c=workspace.CurrentCamera; fPos=c.CFrame.Position; fRot=c.CFrame.LookVector; c.CameraType=Enum.CameraType.Scriptable end, function() freecam=false; workspace.CurrentCamera.CameraType=Enum.CameraType.Custom; local hum=getHum(); if hum then workspace.CurrentCamera.CameraSubject = hum end end)
 toggle(uS, "Click TP (Ctrl+LMB)", function() clickTP=true end, function() clickTP=false end)
 btn(uS, "TP to Spawn", function() local hrp=player.Character and player.Character:FindFirstChild("HumanoidRootPart"); if hrp then for _,o in ipairs(workspace:GetDescendants()) do if o:IsA("SpawnLocation") then hrp.CFrame=o.CFrame+Vector3.new(0,5,0); break end end end end)
 sect(uS, "Automation")
